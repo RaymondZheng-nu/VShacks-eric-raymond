@@ -1,0 +1,102 @@
+/* Minimal skeleton styling — just enough to see the layout during the
+   hackathon. Not a design system; replace freely. */
+
+:root {
+  color-scheme: dark;
+  font-family: system-ui, sans-serif;
+}
+
+body {
+  margin: 0;
+  background: #14151a;
+  color: #f2f2f2;
+}
+
+.app {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 1.5rem;
+}
+
+.app-header h1 {
+  margin: 0 0 1rem;
+}
+
+.app-main {
+  display: grid;
+  gap: 1.25rem;
+}
+
+.app-main section {
+  background: #1e2028;
+  border: 1px solid #33353f;
+  border-radius: 8px;
+  padding: 1rem;
+}
+
+.quota-bar-track {
+  height: 12px;
+  background: #33353f;
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.quota-bar-fill {
+  height: 100%;
+  background: #4ade80;
+}
+
+.debt-counter-game-over {
+  color: #f87171;
+  font-weight: bold;
+}
+
+.stamina-counter-empty {
+  color: #f87171;
+  font-weight: bold;
+}
+
+.shop-list,
+.machine-yard-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.5rem;
+}
+
+.shop-item,
+.machine-yard-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.5rem;
+  background: #14151a;
+  border-radius: 6px;
+}
+
+.status-online {
+  color: #4ade80;
+}
+
+.status-offline {
+  color: #f87171;
+}
+
+.circuit-grid {
+  display: grid;
+  gap: 4px;
+}
+
+.circuit-grid-cell {
+  aspect-ratio: 1;
+  background: #14151a;
+  border: 1px solid #33353f;
+  border-radius: 4px;
+}
+
+.gate-node {
+  font-size: 0.75rem;
+  padding: 0.25rem 0.5rem;
+}
