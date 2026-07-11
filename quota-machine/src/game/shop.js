@@ -14,8 +14,8 @@ export function scaledCost(machine, week) {
 export function generateShopOffers(rng = Math.random) {
   // not proper fisher-yates but honestly close enough for 6 items
   const shuffled = [...MACHINES].sort(() => rng() - 0.5)
-  const numOffers = 4
-  return shuffled.slice(0, numOffers).map((m) => m.id)
+  const offerCount = 4
+  return shuffled.slice(0, offerCount).map((m) => m.id)
 }
 
 // re-rolls shop offers if player has enough credits
@@ -34,7 +34,7 @@ export function buyMachine(state, machineId) {
   const cost = scaledCost(machine, state.week ?? 1)
   if (state.credits < cost) return { state, error: INSUFFICIENT_CREDITS }
 
-  const ownedMachine = {
+  const newMach = {
     instanceId: nextInstanceId(machineId),
     machineId,
     online: false,
@@ -43,11 +43,12 @@ export function buyMachine(state, machineId) {
     position: null,
   }
 
+  // TODO: should we prevent buying duplicates?
   return {
     state: {
       ...state,
       credits: state.credits - cost,
-      ownedMachines: [...state.ownedMachines, ownedMachine],
+      ownedMachines: [...state.ownedMachines, newMach],
     },
     error: null,
   }

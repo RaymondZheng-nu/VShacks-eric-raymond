@@ -13,7 +13,7 @@ export default function Rack({ ownedMachines, pendingInstanceId, onSlotClick, on
     }
   }
 
-  // navigates rack slots with arrow keys
+  // arrow key nav. this was annoying to write
   function handleKeyDown(e, row, col) {
     let nextRow = row
     let nextCol = col
@@ -47,6 +47,8 @@ export default function Rack({ ownedMachines, pendingInstanceId, onSlotClick, on
         className += ' rack-slot--droppable'
       }
 
+      const turns_left = placed ? Math.max(0, placed.failureThreshold - placed.turnsSinceSolved) : 0
+
       slots.push(
         <button
           key={`r${row}c${col}`}
@@ -57,13 +59,14 @@ export default function Rack({ ownedMachines, pendingInstanceId, onSlotClick, on
         >
           {placed ? (
             <>
+              {/* TODO: show machine art here eventually */}
               <span className="rack-slot-name">{machine?.name ?? placed.machineId}</span>
               <span className={placed.online ? 'status-online rack-slot-status' : 'status-offline rack-slot-status'}>
                 {placed.online ? '●' : '○'}
               </span>
               {placed.online && placed.failureThreshold != null && (
                 <span className="rack-slot-stability" title="turns until failure">
-                  {Math.max(0, placed.failureThreshold - placed.turnsSinceSolved)}t
+                  {turns_left}t
                 </span>
               )}
               {!placed.online && placed.failureThreshold != null && (

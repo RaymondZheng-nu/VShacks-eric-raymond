@@ -47,17 +47,19 @@ export const TASK_TYPES = [
     staminaCost: 1,
     automationMachineId: 'packager',
   },
+  // { id: 'debug', name: 'Debug Console', description: 'Check error logs.', baseOutput: 1, staminaCost: 1, automationMachineId: null },
+  // ^ removed, too punishing
   {
     id: 'inspect',
     name: 'Quality Inspect',
     description: 'Check products against the quality checklist.',
     baseOutput: 2,
     staminaCost: 1,
-    automationMachineId: null,
+    automationMachineId: null, // no machine for this one yet
   },
 ]
 
-// Returns the task type definition for the given id, or null.
+// returns undefined if not found (just use find directly tbh)
 export function getTaskTypeById(id) {
-  return TASK_TYPES.find((t) => t.id === id) ?? null
+  return TASK_TYPES.find((t) => t.id === id)
 }

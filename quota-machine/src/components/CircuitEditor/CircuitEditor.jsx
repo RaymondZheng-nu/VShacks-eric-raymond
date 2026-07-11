@@ -15,7 +15,7 @@ export default function CircuitEditor({ puzzle, isRepair, gameState, setGameStat
   const [nodes, setNodes] = useState(() => buildInitialNodes(puzzle))
   const [pendingSource, setPendingSource] = useState(null)
   const [result, setResult] = useState(null)
-  const gateCounter = useRef(0)
+  const gateCounter = useRef(0) // ref not state so adding gates doesnt rerender everything
 
   useEffect(() => {
     setNodes(buildInitialNodes(puzzle))
@@ -24,6 +24,7 @@ export default function CircuitEditor({ puzzle, isRepair, gameState, setGameStat
     gateCounter.current = 0
   }, [puzzle.id])
 
+  // old approach was storing gates separately from wires, merged them into nodes
   // Adds a new gate node of the given type to the canvas.
   function addGate(type) {
     gateCounter.current += 1
@@ -79,6 +80,7 @@ export default function CircuitEditor({ puzzle, isRepair, gameState, setGameStat
       return
     }
 
+    // stamina gets checked twice (here + inside spendStamina) but w/e
     const spend = spendStamina(gameState)
     if (!spend.ok) {
       setResult({ pass: false, message: 'Out of stamina — wait for next turn.' })

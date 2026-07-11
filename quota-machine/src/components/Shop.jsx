@@ -14,7 +14,7 @@ export default function Shop({ credits, week, shopOffers, state, setState, onRer
     setState(nextState)
   }
 
-  const offeredMachines = shopOffers && shopOffers.length > 0
+  const machinesToShow = shopOffers && shopOffers.length > 0
     ? MACHINES.filter((m) => shopOffers.includes(m.id))
     : MACHINES
 
@@ -22,9 +22,10 @@ export default function Shop({ credits, week, shopOffers, state, setState, onRer
     <section className="shop">
       <h2>Shop ({credits} credits)</h2>
       <ul className="shop-list">
-        {offeredMachines.map((machine) => {
+        {machinesToShow.map((machine) => {
           const cost = scaledCost(machine, week ?? 1)
           const automatesTask = TASK_TYPES.find((t) => t.automationMachineId === machine.id)
+          // TODO: show rarity somewhere
           return (
             <li key={machine.id} className="shop-item">
               <div className="shop-item-row">
@@ -37,6 +38,7 @@ export default function Shop({ credits, week, shopOffers, state, setState, onRer
               <div className="shop-item-tooltip">
                 {machine.chips > 0 && <div>+{machine.chips} chips</div>}
                 {machine.multBonus > 0 && <div>+{machine.multBonus} mult</div>}
+                {/* this is kind of buried in the tooltip */}
                 {automatesTask && <div>automates: {automatesTask.name}</div>}
                 <div>puzzle needed: {machine.puzzleId}</div>
               </div>

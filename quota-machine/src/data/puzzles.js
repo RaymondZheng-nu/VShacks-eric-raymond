@@ -50,7 +50,7 @@ export const PUZZLES = [
     allowedGates: [GATE_TYPES.BUFFER],
     spec: genSpec(['a'], ['out'], (a) => ({ out: a })),
   },
-  {
+  { // this one always trips people up
     id: 'half-adder',
     name: 'Half Adder',
     description: 'Two-gate puzzle: sum = XOR, carry = AND.',
@@ -67,13 +67,13 @@ export const PUZZLES = [
   {
     id: 'nand-chain',
     name: 'NAND Chain',
-    description: 'Two-gate puzzle: two NANDs chained reconstruct AND behavior.',
+    description: 'two NANDs chained = AND behavior. don\'t overthink it.',
     allowedGates: [GATE_TYPES.NAND],
     spec: genSpec(['a', 'b'], ['out'], (a, b) => ({ out: a && b })),
   },
 ]
 
-// Returns the puzzle definition for the given id, or undefined.
+// returns undefined if missing (same as Array.find)
 export function getPuzzleById(id) {
   return PUZZLES.find((p) => p.id === id)
 }

@@ -9,6 +9,7 @@ export default function DaySummary({ summary }) {
         {(summary.contributions ?? []).map((c, i) => (
           <li key={i} className="day-summary-row">
             <span>{c.source}</span>
+            {/* probably should be a lookup obj */}
             <span className={
               c.type === 'chips' ? 'day-summary-chips'
               : c.type === '+mult' ? 'day-summary-mult'
@@ -29,10 +30,10 @@ export default function DaySummary({ summary }) {
         <div>+{summary.dailyCredits} credits (online machines)</div>
       )}
       {summary.isQuotaDay && summary.quotaPassed === true && (
-        <div className="day-summary-pass">Quota passed! +{summary.creditsEarned} credits</div>
+        <div className="day-summary-pass">quota passed +{summary.creditsEarned} credits</div>
       )}
       {summary.isQuotaDay && summary.quotaPassed === false && (
-        <div className="day-summary-fail">Quota failed — run over</div>
+        <div className="day-summary-fail">quota failed. game over i guess</div>
       )}
     </section>
   )

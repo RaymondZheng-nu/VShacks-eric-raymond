@@ -1,4 +1,5 @@
 import { TASK_TYPES } from '../data/tasks'
+import { MAX_STAMINA } from './gameState'
 
 // picks 3-5 random tasks, marks automated if machine online
 export function generateDailyTasks(state, rng = Math.random) {
@@ -15,8 +16,8 @@ export function generateDailyTasks(state, rng = Math.random) {
     .filter((m) => m.online)
     .map((m) => m.machineId)
 
-  return picked.map((type, index) => ({
-    id: `task-${state.day}-${index}`,
+  return picked.map((type, idx) => ({
+    id: `task-${state.day}-${idx}`,
     typeId: type.id,
     name: type.name,
     output: type.baseOutput,
@@ -33,6 +34,7 @@ export function resolveTaskManually(state, taskId) {
   if (task.done) return { ok: false, reason: 'task already done', state }
   if (state.stamina <= 0) return { ok: false, reason: 'out of stamina', state }
 
+  // chips from tasks get counted at eod via resolveScore, not here
   return {
     ok: true,
     state: {

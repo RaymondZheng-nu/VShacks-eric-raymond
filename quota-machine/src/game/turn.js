@@ -15,9 +15,9 @@ export function rollFailureThreshold(rng = Math.random) {
   return FAILURE_MIN_TURNS + Math.floor(rng() * span)
 }
 
-// advances one day: ticks machines, scores, checks quota
+// does everything for end of turn, probably too much in one function
 export function advanceTurn(state, rng = Math.random) {
-  const isQuotaDay = state.dayOfWeek === QUOTA_CHECK_DAY
+  const isQuotaDay = state.dayOfWeek === QUOTA_CHECK_DAY // saturday
 
   const ownedMachines = state.ownedMachines.map((m) => ({ ...m }))
 
@@ -97,6 +97,7 @@ export function advanceTurn(state, rng = Math.random) {
   }
 
   const tasks = isGameOver ? [] : generateDailyTasks(nextState, rng)
+  // console.log('day done, tasks:', tasks.length)
   return { ...nextState, tasks }
 }
 

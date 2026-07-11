@@ -22,14 +22,14 @@ const GATE_FNS = {
 
 // Evaluates a node graph and returns { [outputId]: boolean } for every OUTPUT node.
 export function evaluateCircuit(nodes, inputValues) {
-  const byId = new Map(nodes.map((n) => [n.id, n]))
+  const nodeMap = new Map(nodes.map((n) => [n.id, n])) // was byId
   const resolved = new Map()
   const inProgress = new Set()
 
   // Recursively resolves a single node id to its boolean value.
   function resolve(id) {
     if (resolved.has(id)) return resolved.get(id)
-    const node = byId.get(id)
+    const node = nodeMap.get(id)
     if (!node) throw new Error(`Circuit references unknown node "${id}"`)
 
     if (node.type === GATE_TYPES.INPUT) {
@@ -72,6 +72,7 @@ export function evaluateCircuit(nodes, inputValues) {
       outputs[node.id] = resolve(node.id)
     }
   }
+  // console.log('circuit outputs:', outputs)
   return outputs
 }
 
@@ -113,11 +114,11 @@ export function validateCircuit(nodes, spec) {
       actual = null
     }
 
-    const pass =
+    const rowPassed =
       !error &&
       spec.outputIds.every((id) => actual[id] === row.expected[id])
 
-    results.push({ inputValues: row.inputValues, expected: row.expected, actual, error, pass })
+    results.push({ inputValues: row.inputValues, expected: row.expected, actual, error, pass: rowPassed })
   }
 
   const failedRow = results.find((r) => !r.pass) || null

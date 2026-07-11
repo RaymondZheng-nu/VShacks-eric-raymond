@@ -27,13 +27,14 @@ export default function App() {
   const [solvingInstanceId, setSolvingInstanceId] = useState(null)
   const [pendingPlacement, setPendingPlacement] = useState(null)
 
-  // advances the game by one day
+  // end of day — triggers scoring, failure ticks, new tasks
   function handleEndTurn() {
     setState((prev) => advanceTurn(prev))
   }
 
   // brings the solved machine online
   function handleSolved() {
+    // console.log('machine online:', solvingInstanceId)
     setState((prev) => bringMachineOnline(prev, solvingInstanceId))
     setSolvingInstanceId(null)
   }
@@ -90,7 +91,7 @@ export default function App() {
     })
   }
 
-  const solvingMachine = state.ownedMachines.find((m) => m.instanceId === solvingInstanceId)
+  const solvingMachine = state.ownedMachines.find((m) => m.instanceId === solvingInstanceId) // solvingMachine might be undefined if instanceId is stale, that's fine
   // use harder repair puzzle if the machine has failed before (failureThreshold gets set on first activation)
   const isRepair = solvingMachine != null && solvingMachine.failureThreshold != null
   const solvingPuzzle = solvingMachine
@@ -150,6 +151,7 @@ export default function App() {
             select two owned machines, open CircuitEditor with the synergy's
             puzzleId, call gameState.addConnection() on solve */}
 
+        {/* game over state is handled inside each component for now, TODO: proper screen */}
         <TurnControls day={state.day} week={state.week} dayOfWeek={state.dayOfWeek} onEndTurn={handleEndTurn} disabled={state.isGameOver} />
       </main>
 

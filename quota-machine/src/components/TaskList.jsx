@@ -7,7 +7,9 @@ export default function TaskList({ tasks, stamina, onResolve }) {
         <p>No tasks yet — advance to the next day.</p>
       ) : (
         <ul className="task-list-items">
-          {tasks.map((task) => (
+          {tasks.map((task) => {
+            const t = task // old name
+            return (
             <li key={task.id} className={`task-item${task.done ? ' task-item--done' : ''}`}>
               <span className="task-name">{task.name}</span>
               <span className="task-output">+{task.output} chips</span>
@@ -18,12 +20,16 @@ export default function TaskList({ tasks, stamina, onResolve }) {
                 <span className="task-badge task-badge--done">Done</span>
               )}
               {!task.done && !task.automated && (
-                <button onClick={() => onResolve(task.id)} disabled={stamina <= 0}>
-                  Do it ({task.staminaCost} stamina)
-                </button>
+                <>
+                  {/* TODO: show stamina cost as pips not text */}
+                  <button onClick={() => onResolve(task.id)} disabled={stamina <= 0}>
+                    Do it ({task.staminaCost} stamina)
+                  </button>
+                </>
               )}
             </li>
-          ))}
+            )
+          })}
         </ul>
       )}
     </section>

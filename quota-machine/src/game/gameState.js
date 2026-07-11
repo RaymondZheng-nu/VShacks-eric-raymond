@@ -28,7 +28,7 @@ export function createInitialState() {
   }
 }
 
-let instanceCounter = 0
+let instanceCounter = 0 // lol a global, TODO: shove this into state someday
 // returns a unique string id with the given prefix
 export function nextInstanceId(prefix) {
   instanceCounter += 1
@@ -36,12 +36,12 @@ export function nextInstanceId(prefix) {
 }
 
 // marks machine online after puzzle solve
-export function bringMachineOnline(state, instanceId, rng = Math.random) {
+export function bringMachineOnline(state, instanceId, rand = Math.random) {
   return {
     ...state,
     ownedMachines: state.ownedMachines.map((m) =>
       m.instanceId === instanceId
-        ? { ...m, online: true, turnsSinceSolved: 0, failureThreshold: rollFailureThreshold(rng) }
+        ? { ...m, online: true, turnsSinceSolved: 0, failureThreshold: rollFailureThreshold(rand) }
         : m
     ),
   }
@@ -52,7 +52,7 @@ export function addConnection(state, instanceIdA, instanceIdB) {
   const connection = {
     instanceId: nextInstanceId('connection'),
     machineInstanceIds: [instanceIdA, instanceIdB],
-    solved: true,
+    solved: true, // solved:true is hardcoded bc we don't have unsolved connections yet
   }
   return { ...state, connections: [...state.connections, connection] }
 }

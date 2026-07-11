@@ -63,7 +63,7 @@ export const MACHINES = [
   {
     id: 'packager',
     name: 'Auto Packager',
-    cost: 30,
+    cost: 30, // same as welder, intentional
     chips: 8,
     multBonus: 0,
     baseOutput: 8,

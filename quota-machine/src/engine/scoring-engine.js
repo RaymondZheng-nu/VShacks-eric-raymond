@@ -1,6 +1,6 @@
 export const DEFAULT_SYNERGY_XMULT = 1.1
 
-// Computes (chips × mult) score from online machines, completed tasks, and synergy connections.
+// computes (chips * mult) score; tasks count as chips at eod
 export function resolveScore({ ownedMachines, connections = [], tasks = [], partCatalog, synergyCatalog }) {
   let chips = 0
   let mult = 1
@@ -41,11 +41,13 @@ export function resolveScore({ ownedMachines, connections = [], tasks = [], part
     const xmult = synergy?.multiplier ?? DEFAULT_SYNERGY_XMULT
     mult *= xmult
 
+    // TODO: should probably cache part lookups but whatever
     const nameA = partCatalog.find((p) => p.id === ownedA.machineId)?.name ?? ownedA.machineId
     const nameB = partCatalog.find((p) => p.id === ownedB.machineId)?.name ?? ownedB.machineId
     contributions.push({ source: `${nameA} ↔ ${nameB}`, type: 'xmult', value: xmult })
   }
 
   const total = Math.round(chips * mult)
+  // console.log('score', chips, mult, total)
   return { chips, mult, total, contributions }
 }
