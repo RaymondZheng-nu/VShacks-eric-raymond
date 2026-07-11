@@ -4,7 +4,7 @@ import { getMachineById } from '../data/machines'
 // player pick one to open in CircuitEditor (to solve its puzzle and bring
 // it online, or re-solve it after a failure).
 // Props: { ownedMachines: OwnedMachine[], connections: Connection[], setState: (fn) => void }
-export default function MachineYard({ ownedMachines, connections = [] }) {
+export default function MachineYard({ ownedMachines, connections }) {
   return (
     <section className="machine-yard">
       <h2>Machine Yard</h2>
@@ -25,8 +25,7 @@ export default function MachineYard({ ownedMachines, connections = [] }) {
         })}
       </ul>
       {/* TODO: drag-to-connect two machines to open a synergy connection puzzle,
-          call gameState.addConnection() on success */}
-      <p className="machine-yard-connections">Connections: {connections.length}</p>
+          call gameState.addConnection() on success. connections: {connections.length} */}
     </section>
   )
 }
