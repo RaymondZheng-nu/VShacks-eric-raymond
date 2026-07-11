@@ -12,7 +12,7 @@ export const UNKNOWN_MACHINE = 'UNKNOWN_MACHINE'
  * { state, error } — state is unchanged and error is set if the purchase
  * is invalid, so the UI can show why.
  */
-export function buyMachine(state, machineId) {
+export function buyMachine(state, machineId, rng) {
   const machine = getMachineById(machineId)
   if (!machine) {
     return { state, error: UNKNOWN_MACHINE }

@@ -1,51 +1,87 @@
+import { useState, useEffect, useRef } from 'react'
 import Grid from './Grid.jsx'
-import { validateCircuit } from '../../engine/circuit-engine.js'
+import { validateCircuit, GATE_TYPES } from '../../engine/circuit-engine.js'
 import { spendStamina } from '../../game/turn.js'
 
-// Top-level circuit puzzle editor: renders a grid-based (not freeform)
-// gate-placement + wire-connection surface, and validates the player's
-// circuit against a puzzle spec via engine/circuit-engine.js. A passing
-// solve (powering a machine or connecting two machines) costs 1 stamina,
-// via game/turn.js's spendStamina — buying/upgrading machines never goes
-// through here and is never stamina-gated.
-// Props:
-//   puzzle: Puzzle (from data/puzzles.js)
-//   gameState: GameState — read for current stamina
-//   setGameState: (state) => void — called with the post-spend state on a pass
-//   onSolved: () => void — called once the solve is validated AND stamina spent
-//   onCancel: () => void
-export default function CircuitEditor({ puzzle, gameState, setGameState, onSolved, onCancel }) {
-  // TODO: local state for placed gates/wires (grid cell -> node), selected
-  // palette gate, and the last validateCircuit() result to show
-  // failedRow feedback to the player.
+function buildInitialNodes(puzzle) {
+  const inputNodes = puzzle.spec.inputIds.map((id) => ({ id, type: GATE_TYPES.INPUT }))
+  const outputNodes = puzzle.spec.outputIds.map((id) => ({ id, type: GATE_TYPES.OUTPUT, inputs: [] }))
+  return [...inputNodes, ...outputNodes]
+}
 
-  function handleCheck() {
-    if (gameState.stamina <= 0) {
-      // TODO: surface a "out of stamina, wait for next turn" UI state
-      // instead of just logging.
-      console.warn('handleCheck blocked: out of stamina')
+export default function CircuitEditor({ puzzle, gameState, setGameState, onSolved, onCancel }) {
+  const [nodes, setNodes] = useState(() => buildInitialNodes(puzzle))
+  const [pendingSource, setPendingSource] = useState(null)
+  const [result, setResult] = useState(null)
+  const gateCounter = useRef(0)
+
+  useEffect(() => {
+    setNodes(buildInitialNodes(puzzle))
+    setPendingSource(null)
+    setResult(null)
+    gateCounter.current = 0
+  }, [puzzle.id])
+
+  function addGate(type) {
+    gateCounter.current += 1
+    const id = `gate-${type.toLowerCase()}-${gateCounter.current}`
+    setNodes((prev) => [...prev, { id, type, inputs: [] }])
+  }
+
+  function handleSelectNode(node) {
+    if (pendingSource === null) {
+      if (node.type === GATE_TYPES.OUTPUT) return // outputs are targets only
+      setPendingSource(node.id)
       return
     }
 
-    // TODO: build playerNodes from local grid state once gate placement
-    // and wiring are implemented; this is a stand-in until then.
-    const playerNodes = []
-    const result = validateCircuit(playerNodes, puzzle.spec)
+    if (pendingSource === node.id) {
+      setPendingSource(null) // click same node again to cancel
+      return
+    }
 
-    if (!result.pass) {
-      // TODO: show result.failedRow feedback to the player.
+    if (node.type === GATE_TYPES.INPUT) {
+      setPendingSource(null) // inputs can't receive a wire
+      return
+    }
+
+    setNodes((prev) =>
+      prev.map((n) =>
+        n.id === node.id ? { ...n, inputs: [...(n.inputs || []), pendingSource] } : n
+      )
+    )
+    setPendingSource(null)
+  }
+
+  function clearWire(nodeId, wireIndex) {
+    setNodes((prev) =>
+      prev.map((n) =>
+        n.id === nodeId ? { ...n, inputs: n.inputs.filter((_, i) => i !== wireIndex) } : n
+      )
+    )
+  }
+
+  function handleCheck() {
+    if (gameState.stamina <= 0) {
+      setResult({ pass: false, message: 'Out of stamina — wait for next turn.' })
+      return
+    }
+
+    const validation = validateCircuit(nodes, puzzle.spec)
+
+    if (!validation.pass) {
+      setResult({ pass: false, validation })
       return
     }
 
     const spend = spendStamina(gameState)
     if (!spend.ok) {
-      // TODO: surface a "out of stamina, wait for next turn" UI state
-      // instead of just logging.
-      console.warn('handleCheck blocked: out of stamina')
+      setResult({ pass: false, message: 'Out of stamina — wait for next turn.' })
       return
     }
 
     setGameState(spend.state)
+    setResult({ pass: true, validation })
     onSolved()
   }
 
@@ -54,12 +90,43 @@ export default function CircuitEditor({ puzzle, gameState, setGameState, onSolve
       <h2>{puzzle?.name ?? 'Circuit Puzzle'}</h2>
       <p>{puzzle?.description}</p>
 
-      <Grid puzzle={puzzle} />
+      <div className="circuit-editor-palette">
+        {puzzle.allowedGates.map((type) => (
+          <button key={type} onClick={() => addGate(type)}>+ {type}</button>
+        ))}
+      </div>
+
+      <Grid
+        puzzle={puzzle}
+        nodes={nodes}
+        pendingSource={pendingSource}
+        onSelectNode={handleSelectNode}
+        onClearWire={clearWire}
+      />
 
       <div className="circuit-editor-actions">
         <button onClick={handleCheck}>Check Circuit</button>
         <button onClick={onCancel}>Cancel</button>
       </div>
+
+      {result && (
+        <div className={`circuit-result circuit-result--${result.pass ? 'pass' : 'fail'}`}>
+          {result.pass && <p>PASS</p>}
+          {!result.pass && result.message && <p>{result.message}</p>}
+          {!result.pass && result.validation && (
+            <>
+              <p>FAIL</p>
+              {result.validation.failedRow && (
+                <p>
+                  Failed on inputs {JSON.stringify(result.validation.failedRow.inputValues)} —
+                  expected {JSON.stringify(result.validation.failedRow.expected)}, got{' '}
+                  {result.validation.failedRow.error ?? JSON.stringify(result.validation.failedRow.actual)}
+                </p>
+              )}
+            </>
+          )}
+        </div>
+      )}
     </div>
   )
 }

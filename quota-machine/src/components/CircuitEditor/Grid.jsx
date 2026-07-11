@@ -14,13 +14,12 @@ export default function Grid({ puzzle }) {
   return (
     <div
       className="circuit-grid"
-      data-puzzle-id={puzzle?.id}
       style={{ gridTemplateColumns: `repeat(${GRID_COLS}, 1fr)` }}
     >
       {cells.map((_, i) => (
         <div key={i} className="circuit-grid-cell" data-index={i} />
       ))}
-      {/* TODO: pin layout for puzzle.spec.inputIds/outputIds + gate palette drag targets */}
+      {/* TODO: puzzle "{puzzle?.id}" pin layout + gate palette drag targets */}
     </div>
   )
 }
