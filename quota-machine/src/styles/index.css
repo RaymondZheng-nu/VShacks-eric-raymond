@@ -86,7 +86,8 @@ body {
 
 .circuit-grid {
   display: grid;
-  gap: 4px;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
 }
 
 .circuit-grid-cell {
@@ -96,7 +97,61 @@ body {
   border-radius: 4px;
 }
 
+.circuit-grid-col {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.circuit-grid-gate-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.circuit-grid-wires {
+  display: flex;
+  gap: 0.25rem;
+  flex-wrap: wrap;
+}
+
+.circuit-grid-wire-tag {
+  font-size: 0.7rem;
+  background: #14151a;
+  border: 1px solid #33353f;
+  border-radius: 4px;
+  padding: 0.1rem 0.35rem;
+}
+
+.circuit-editor-palette {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin-bottom: 1rem;
+}
+
 .gate-node {
   font-size: 0.75rem;
   padding: 0.25rem 0.5rem;
+}
+
+.gate-node--selected {
+  outline: 2px solid #4ade80;
+}
+
+.circuit-result {
+  margin-top: 1rem;
+  padding: 0.5rem;
+  border-radius: 6px;
+}
+
+.circuit-result--pass {
+  background: rgba(74, 222, 128, 0.15);
+  color: #4ade80;
+}
+
+.circuit-result--fail {
+  background: rgba(248, 113, 113, 0.15);
+  color: #f87171;
 }

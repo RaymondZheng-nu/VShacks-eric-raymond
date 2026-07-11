@@ -1,10 +1,10 @@
 import { getMachineById } from '../data/machines'
 
 // Displays owned machines, their online/offline status, and lets the
-// player pick one to open in CircuitEditor (to solve its puzzle and bring
-// it online, or re-solve it after a failure).
-// Props: { ownedMachines: OwnedMachine[], connections: Connection[], setState: (fn) => void }
-export default function MachineYard({ ownedMachines, connections }) {
+// player pick an offline one to open in CircuitEditor (to solve its
+// puzzle and bring it online, or re-solve it after a failure).
+// Props: { ownedMachines: OwnedMachine[], connections: Connection[], onSelectMachine: (ownedMachine) => void }
+export default function MachineYard({ ownedMachines, connections = [], onSelectMachine }) {
   return (
     <section className="machine-yard">
       <h2>Machine Yard</h2>
@@ -18,14 +18,14 @@ export default function MachineYard({ ownedMachines, connections }) {
               <span className={owned.online ? 'status-online' : 'status-offline'}>
                 {owned.online ? 'Online' : 'Offline'}
               </span>
-              {/* TODO: click to open CircuitEditor with machine's puzzleId,
-                  call gameState.bringMachineOnline() on a validateCircuit() pass */}
+              {!owned.online && <button onClick={() => onSelectMachine(owned)}>Solve</button>}
             </li>
           )
         })}
       </ul>
       {/* TODO: drag-to-connect two machines to open a synergy connection puzzle,
-          call gameState.addConnection() on success. connections: {connections.length} */}
+          call gameState.addConnection() on success */}
+      <p className="machine-yard-connections">Connections: {connections.length}</p>
     </section>
   )
 }
