@@ -1,10 +1,6 @@
-// Renders the placed circuit nodes in fixed columns (Inputs / Gates /
-// Outputs) — grid-based placement, not freeform dragging. Clicking a node
-// starts or completes a wire (see CircuitEditor's handleSelectNode); wires
-// into a node are shown as removable tags rather than as Wire.jsx lines.
-// Props: { puzzle: Puzzle, nodes, pendingSource, onSelectNode, onClearWire }
 import GateNode from './GateNode.jsx'
 
+// Renders placed circuit nodes in three fixed columns: Inputs, Gates, Outputs.
 export default function Grid({ puzzle, nodes, pendingSource, onSelectNode, onClearWire }) {
   const inputNodes = nodes.filter((n) => n.type === 'INPUT')
   const outputNodes = nodes.filter((n) => n.type === 'OUTPUT')

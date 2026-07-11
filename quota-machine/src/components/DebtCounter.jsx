@@ -1,14 +1,13 @@
-// Shows accumulated debt against the loss-condition cutoff.
-// Props: { debt: number, debtCutoff: number, isGameOver: boolean }
-export default function DebtCounter({ debt, debtCutoff, isGameOver }) {
+import { QUOTA_CHECK_DAY } from '../game/gameState'
+
+// Shows how many days remain until the Saturday quota deadline.
+export default function QuotaDeadline({ week, dayOfWeek }) {
+  const daysLeft = QUOTA_CHECK_DAY - dayOfWeek
   return (
-    <section className="debt-counter">
-      <h2>Debt</h2>
-      <p>
-        {debt} / {debtCutoff}
-      </p>
-      {isGameOver && <p className="debt-counter-game-over">GAME OVER — debt cutoff reached</p>}
-      {/* TODO: warning styling as debt approaches cutoff */}
+    <section className="quota-deadline">
+      <h2>Deadline</h2>
+      <p>Quota due Saturday of Week {week}</p>
+      <p>{daysLeft} day{daysLeft !== 1 ? 's' : ''} left</p>
     </section>
   )
 }

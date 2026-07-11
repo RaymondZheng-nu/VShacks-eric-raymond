@@ -1,84 +1,58 @@
-// Plain-object game state shape + small pure helpers for creating/mutating
-// it. No React here — components should only ever call into game/ and
-// engine/, never encode rules themselves.
-
 import { rollFailureThreshold } from './turn'
 
-export const STARTING_DEBT_CUTOFF = 100
 export const MAX_STAMINA = 3
+export const STARTING_CREDITS = 50
+export const DAYS_PER_WEEK = 6
+export const QUOTA_CHECK_DAY = 6
+export const DAY_NAMES = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
+export const RACK_ROWS = 3
+export const RACK_COLS = 4
 
-/**
- * ownedMachine shape:
- *   {
- *     instanceId: string,       // unique per purchase, since you can own dupes
- *     machineId: string,        // ref into data/machines.js
- *     online: boolean,
- *     turnsSinceSolved: number, // turns since last solved/repaired
- *     failureThreshold: number | null, // turns online before it can fail; null until first solved
- *   }
- *
- * connection shape:
- *   {
- *     instanceId: string,
- *     machineInstanceIds: [string, string],
- *     solved: boolean,
- *   }
- */
+// returns fresh plain-object state for a new run
 export function createInitialState() {
   return {
-    turn: 1,
+    day: 1,
+    week: 1,
+    dayOfWeek: 1,
     quotaRequired: 10,
     quotaProgress: 0,
-    debt: 0,
-    debtCutoff: STARTING_DEBT_CUTOFF,
-    credits: 50,
+    credits: STARTING_CREDITS,
     stamina: MAX_STAMINA,
     maxStamina: MAX_STAMINA,
     ownedMachines: [],
     connections: [],
+    tasks: [],
+    shopOffers: [],
+    lastDaySummary: null,
     isGameOver: false,
   }
 }
 
 let instanceCounter = 0
+// returns a unique string id with the given prefix
 export function nextInstanceId(prefix) {
   instanceCounter += 1
   return `${prefix}-${instanceCounter}`
 }
 
-/**
- * Marks an owned machine online after its puzzle has been solved
- * (initial solve, or re-solve after a failure), rolling a fresh
- * randomized failure threshold.
- */
+// marks machine online after puzzle solve
 export function bringMachineOnline(state, instanceId, rng = Math.random) {
   return {
     ...state,
     ownedMachines: state.ownedMachines.map((m) =>
       m.instanceId === instanceId
-        ? {
-            ...m,
-            online: true,
-            turnsSinceSolved: 0,
-            failureThreshold: rollFailureThreshold(rng),
-          }
+        ? { ...m, online: true, turnsSinceSolved: 0, failureThreshold: rollFailureThreshold(rng) }
         : m
     ),
   }
 }
 
-/**
- * Records a solved connection puzzle between two owned machines, enabling
- * the synergy bonus between them on future turns.
- */
+// records a solved connection between two owned machines
 export function addConnection(state, instanceIdA, instanceIdB) {
   const connection = {
     instanceId: nextInstanceId('connection'),
     machineInstanceIds: [instanceIdA, instanceIdB],
     solved: true,
   }
-  return {
-    ...state,
-    connections: [...state.connections, connection],
-  }
+  return { ...state, connections: [...state.connections, connection] }
 }

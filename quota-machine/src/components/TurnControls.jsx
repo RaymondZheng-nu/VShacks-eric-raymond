@@ -1,14 +1,13 @@
-// Turn counter + "End Turn" button, which calls game/turn.js's
-// advanceTurn() (via App.jsx's handleEndTurn).
-// Props: { turn: number, onEndTurn: () => void, disabled: boolean }
-export default function TurnControls({ turn, onEndTurn, disabled }) {
+import { DAY_NAMES, QUOTA_CHECK_DAY } from '../game/gameState'
+
+// Day/week display and End Day / End Week button.
+export default function TurnControls({ day, week, dayOfWeek, onEndTurn, disabled }) {
   return (
     <section className="turn-controls">
-      <h2>Turn {turn}</h2>
+      <h2>Week {week} — {DAY_NAMES[dayOfWeek - 1]}</h2>
       <button onClick={onEndTurn} disabled={disabled}>
-        End Turn
+        {dayOfWeek === QUOTA_CHECK_DAY ? 'End Week (Quota Check)' : 'End Day'}
       </button>
-      {/* TODO: confirmation if machines are still offline / unsolved this turn */}
     </section>
   )
 }

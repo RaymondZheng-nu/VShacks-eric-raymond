@@ -1,58 +1,80 @@
-// 6 hardcoded machines available in the shop. `puzzleId` points at the
-// puzzle (see data/puzzles.js) the player must solve to bring the machine
-// online, and re-solve when it randomly fails.
-
+// baseOutput is basically the same as chips but shop tooltip uses it, TODO clean up
 export const MACHINES = [
   {
     id: 'conveyor',
     name: 'Conveyor Feeder',
     cost: 10,
-    baseOutput: 1,
+    chips: 2,
+    multBonus: 0,
+    baseOutput: 2,
+    rarity: 'common',
     artKey: 'conveyor',
     puzzleId: 'and-basic',
+    repairPuzzleId: 'nand-chain',
   },
   {
     id: 'stamper',
     name: 'Hydraulic Stamper',
     cost: 15,
-    baseOutput: 2,
+    chips: 4,
+    multBonus: 0,
+    baseOutput: 4,
+    rarity: 'common',
     artKey: 'stamper',
     puzzleId: 'or-basic',
+    repairPuzzleId: 'and-or-combo',
   },
   {
     id: 'inverter-rig',
     name: 'Inverter Rig',
     cost: 12,
-    baseOutput: 1,
+    baseOutput: 0,
+    chips: 0,
+    multBonus: 2,
+    rarity: 'uncommon',
     artKey: 'inverter-rig',
     puzzleId: 'not-basic',
+    repairPuzzleId: 'half-adder',
   },
   {
     id: 'sorter',
     name: 'Optical Sorter',
     cost: 20,
-    baseOutput: 3,
+    chips: 6,
+    multBonus: 0,
+    baseOutput: 6,
+    rarity: 'uncommon',
     artKey: 'sorter',
     puzzleId: 'xor-basic',
+    repairPuzzleId: 'half-adder',
   },
   {
     id: 'welder',
     name: 'Robotic Welder',
     cost: 25,
-    baseOutput: 3,
+    chips: 4,
+    multBonus: 2,
+    baseOutput: 4,
+    rarity: 'rare',
     artKey: 'welder',
     puzzleId: 'nand-basic',
+    repairPuzzleId: 'and-or-combo',
   },
   {
     id: 'packager',
     name: 'Auto Packager',
     cost: 30,
-    baseOutput: 4,
+    chips: 8,
+    multBonus: 0,
+    baseOutput: 8,
+    rarity: 'common',
     artKey: 'packager',
     puzzleId: 'nor-basic',
+    repairPuzzleId: 'nand-chain',
   },
 ]
 
+// find machine by id, returns undefined if missing
 export function getMachineById(id) {
   return MACHINES.find((m) => m.id === id)
 }

@@ -1,11 +1,3 @@
-// Puzzle content, generated from one-line boolean rules via genSpec() so
-// authoring new puzzles never means hand-writing a truth table.
-//
-// Each puzzle: { id, name, description, allowedGates, spec }
-// `spec` is what engine/circuit-engine.js's validateCircuit() expects.
-// `allowedGates` is a hint for CircuitEditor's gate palette, not enforced
-// by the engine itself.
-
 import { GATE_TYPES, genSpec } from '../engine/circuit-engine'
 
 export const PUZZLES = [
@@ -61,34 +53,27 @@ export const PUZZLES = [
   {
     id: 'half-adder',
     name: 'Half Adder',
-    description:
-      'Two-gate connection puzzle: sum is on when inputs differ, carry is on when both are on.',
+    description: 'Two-gate puzzle: sum = XOR, carry = AND.',
     allowedGates: [GATE_TYPES.XOR, GATE_TYPES.AND],
-    spec: genSpec(['a', 'b'], ['sum', 'carry'], (a, b) => ({
-      sum: a !== b,
-      carry: a && b,
-    })),
+    spec: genSpec(['a', 'b'], ['sum', 'carry'], (a, b) => ({ sum: a !== b, carry: a && b })),
   },
   {
     id: 'and-or-combo',
     name: 'AND-OR Combo',
-    description:
-      'Two-gate connection puzzle: output is on when a and b are both on, or c is on.',
+    description: 'Two-gate puzzle: output is on when (a AND b) OR c.',
     allowedGates: [GATE_TYPES.AND, GATE_TYPES.OR],
-    spec: genSpec(['a', 'b', 'c'], ['out'], (a, b, c) => ({
-      out: (a && b) || c,
-    })),
+    spec: genSpec(['a', 'b', 'c'], ['out'], (a, b, c) => ({ out: (a && b) || c })),
   },
   {
     id: 'nand-chain',
     name: 'NAND Chain',
-    description:
-      'Two-gate connection puzzle: feed one NAND into another to reconstruct AND behavior.',
+    description: 'Two-gate puzzle: two NANDs chained reconstruct AND behavior.',
     allowedGates: [GATE_TYPES.NAND],
     spec: genSpec(['a', 'b'], ['out'], (a, b) => ({ out: a && b })),
   },
 ]
 
+// Returns the puzzle definition for the given id, or undefined.
 export function getPuzzleById(id) {
   return PUZZLES.find((p) => p.id === id)
 }

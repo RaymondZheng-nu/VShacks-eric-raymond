@@ -1,5 +1,4 @@
-// Renders the current turn's quota progress bar.
-// Props: { quotaProgress: number, quotaRequired: number }
+// Renders the weekly quota progress bar.
 export default function QuotaBar({ quotaProgress, quotaRequired }) {
   const pct = Math.min(100, Math.round((quotaProgress / quotaRequired) * 100))
 
@@ -9,10 +8,7 @@ export default function QuotaBar({ quotaProgress, quotaRequired }) {
       <div className="quota-bar-track">
         <div className="quota-bar-fill" style={{ width: `${pct}%` }} />
       </div>
-      <p>
-        {quotaProgress} / {quotaRequired}
-      </p>
-      {/* TODO: animate fill, show per-machine contribution breakdown */}
+      <p>{quotaProgress} / {quotaRequired}</p>
     </section>
   )
 }

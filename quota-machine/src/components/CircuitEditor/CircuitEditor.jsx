@@ -3,13 +3,15 @@ import Grid from './Grid.jsx'
 import { validateCircuit, GATE_TYPES } from '../../engine/circuit-engine.js'
 import { spendStamina } from '../../game/turn.js'
 
+// Returns the starting input/output nodes for a puzzle with no gates placed yet.
 function buildInitialNodes(puzzle) {
   const inputNodes = puzzle.spec.inputIds.map((id) => ({ id, type: GATE_TYPES.INPUT }))
   const outputNodes = puzzle.spec.outputIds.map((id) => ({ id, type: GATE_TYPES.OUTPUT, inputs: [] }))
   return [...inputNodes, ...outputNodes]
 }
 
-export default function CircuitEditor({ puzzle, gameState, setGameState, onSolved, onCancel }) {
+// Modal circuit builder: lets the player wire gates to satisfy a puzzle's truth table.
+export default function CircuitEditor({ puzzle, isRepair, gameState, setGameState, onSolved, onCancel }) {
   const [nodes, setNodes] = useState(() => buildInitialNodes(puzzle))
   const [pendingSource, setPendingSource] = useState(null)
   const [result, setResult] = useState(null)
@@ -22,26 +24,28 @@ export default function CircuitEditor({ puzzle, gameState, setGameState, onSolve
     gateCounter.current = 0
   }, [puzzle.id])
 
+  // Adds a new gate node of the given type to the canvas.
   function addGate(type) {
     gateCounter.current += 1
     const id = `gate-${type.toLowerCase()}-${gateCounter.current}`
     setNodes((prev) => [...prev, { id, type, inputs: [] }])
   }
 
+  // Handles a node click: starts a wire from a source or completes a wire to a target.
   function handleSelectNode(node) {
     if (pendingSource === null) {
-      if (node.type === GATE_TYPES.OUTPUT) return // outputs are targets only
+      if (node.type === GATE_TYPES.OUTPUT) return
       setPendingSource(node.id)
       return
     }
 
     if (pendingSource === node.id) {
-      setPendingSource(null) // click same node again to cancel
+      setPendingSource(null)
       return
     }
 
     if (node.type === GATE_TYPES.INPUT) {
-      setPendingSource(null) // inputs can't receive a wire
+      setPendingSource(null)
       return
     }
 
@@ -53,6 +57,7 @@ export default function CircuitEditor({ puzzle, gameState, setGameState, onSolve
     setPendingSource(null)
   }
 
+  // Removes the wire at the given index from a node's inputs array.
   function clearWire(nodeId, wireIndex) {
     setNodes((prev) =>
       prev.map((n) =>
@@ -61,6 +66,7 @@ export default function CircuitEditor({ puzzle, gameState, setGameState, onSolve
     )
   }
 
+  // Validates the circuit; on pass spends 1 stamina and calls onSolved.
   function handleCheck() {
     if (gameState.stamina <= 0) {
       setResult({ pass: false, message: 'Out of stamina — wait for next turn.' })
@@ -68,7 +74,6 @@ export default function CircuitEditor({ puzzle, gameState, setGameState, onSolve
     }
 
     const validation = validateCircuit(nodes, puzzle.spec)
-
     if (!validation.pass) {
       setResult({ pass: false, validation })
       return
@@ -87,12 +92,20 @@ export default function CircuitEditor({ puzzle, gameState, setGameState, onSolve
 
   return (
     <div className="circuit-editor">
-      <h2>{puzzle?.name ?? 'Circuit Puzzle'}</h2>
+      <h2>{isRepair ? '⚠ REPAIR: ' : 'INSTALL: '}{puzzle?.name ?? 'Circuit Puzzle'}</h2>
       <p>{puzzle?.description}</p>
 
       <div className="circuit-editor-palette">
         {puzzle.allowedGates.map((type) => (
-          <button key={type} onClick={() => addGate(type)}>+ {type}</button>
+          <button key={type} className="palette-btn" onClick={() => addGate(type)}>
+            <img
+              src={`/quota-machine/sprites/circuits/${type}.png`}
+              alt={type}
+              className="palette-sprite"
+              onError={(e) => { e.currentTarget.style.display = 'none' }}
+            />
+            {type}
+          </button>
         ))}
       </div>
 
