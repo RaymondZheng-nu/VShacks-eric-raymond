@@ -1,0 +1,33 @@
+const UI_BASE = '/quota-machine/sprites/ui'
+
+// stats/journal icons are best-guess mappings from available art — swap if wrong
+const SLOTS = [
+  { key: 'shop', icon: 'icon-shop.png', label: 'Shop' },
+  { key: 'machines', icon: 'icon-machines.png', label: 'Machines' },
+  { key: 'stats', icon: 'icon-stats.png', label: 'Stats' },
+  { key: 'journal', icon: 'icon-journal.png', label: 'Journal' },
+  { key: 'settings', icon: 'icon-settings.png', label: 'Settings' },
+  { key: 'endturn', icon: 'icon-endturn.png', label: 'End Turn' },
+]
+
+// bottom-center nav: 6 boxes for Shop, Machines, Stats, Journal, Settings, End Turn
+export default function Taskbar({ activePanel, onSelectPanel, onEndTurn, endTurnLabel, endTurnDisabled }) {
+  return (
+    <div className="taskbar" style={{ backgroundImage: `url(${UI_BASE}/taskbar.png)` }}>
+      {SLOTS.map((slot) => {
+        const isEndTurn = slot.key === 'endturn'
+        return (
+          <button
+            key={slot.key}
+            className={`taskbar-slot${activePanel === slot.key ? ' taskbar-slot--active' : ''}`}
+            onClick={isEndTurn ? onEndTurn : () => onSelectPanel(slot.key)}
+            disabled={isEndTurn && endTurnDisabled}
+            title={isEndTurn ? endTurnLabel : slot.label}
+          >
+            <img src={`${UI_BASE}/${slot.icon}`} alt={slot.label} />
+          </button>
+        )
+      })}
+    </div>
+  )
+}

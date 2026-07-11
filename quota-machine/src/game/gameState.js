@@ -5,8 +5,6 @@ export const STARTING_CREDITS = 50
 export const DAYS_PER_WEEK = 6
 export const QUOTA_CHECK_DAY = 6
 export const DAY_NAMES = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
-export const RACK_ROWS = 3
-export const RACK_COLS = 4
 
 // returns fresh plain-object state for a new run
 export function createInitialState() {

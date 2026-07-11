@@ -1,28 +1,33 @@
 import { getMachineById } from '../data/machines'
 
-// shows unplaced machines with a button to select placement
-export default function MachineYard({ ownedMachines, selectedInstanceId, onSelect }) {
-  const inventory = ownedMachines.filter((m) => !m.position)
-
+// lists every owned machine; offline ones can be installed/repaired via onSolve
+export default function MachineYard({ ownedMachines, onSolve }) {
   return (
     <section className="machine-yard">
-      <h2>Inventory</h2>
-      {inventory.length === 0 ? (
-        <p>All machines are on the Rack.</p>
+      <h2>Machines</h2>
+      {ownedMachines.length === 0 ? (
+        <p>No machines yet — visit the shop.</p>
       ) : (
         <ul className="machine-yard-list">
-          {inventory.map((owned) => {
+          {ownedMachines.map((owned) => {
             const machine = getMachineById(owned.machineId)
-            const isSelected = owned.instanceId === selectedInstanceId
+            const isRepair = owned.failureThreshold != null && !owned.online
+            const stability = owned.online && owned.failureThreshold != null
+              ? Math.max(0, owned.failureThreshold - owned.turnsSinceSolved)
+              : null
             return (
-              <li
-                key={owned.instanceId}
-                className={isSelected ? 'machine-yard-item machine-yard-item--selected' : 'machine-yard-item'}
-              >
+              <li key={owned.instanceId} className="machine-yard-item">
                 <span>{machine?.name ?? owned.machineId}</span>
-                <button onClick={() => onSelect(isSelected ? null : owned.instanceId)}>
-                  {isSelected ? 'Cancel' : 'Place'}
-                </button>
+                <span className={owned.online ? 'status-online' : 'status-offline'}>
+                  {owned.online ? 'Online' : 'Offline'}
+                </span>
+                {stability != null && (
+                  <span className="machine-yard-stability" title="turns until failure">{stability}t</span>
+                )}
+                {isRepair && <span className="machine-yard-repair-badge">REPAIR</span>}
+                {!owned.online && (
+                  <button onClick={() => onSolve(owned.instanceId)}>{isRepair ? 'Repair' : 'Install'}</button>
+                )}
               </li>
             )
           })}
