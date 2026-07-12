@@ -1,3 +1,4 @@
+import { useEffect, useRef, useState } from 'react'
 import { getMachineById } from '../data/machines'
 import { SHELF_SLOTS } from '../data/shelfSlots'
 
@@ -14,6 +15,28 @@ function slotPositionFor(instanceId, ownedMachines) {
 // auto-places owned machines on fixed shelf slots in purchase order — no drag/placement
 // TODO: swap SHELF_SPRITE for a per-machine sprite (owned.machineId / artKey) once that art exists
 export default function MachineShelf({ ownedMachines, onSolve, connectingMode, selectedMachineA, onConnectClick, connections }) {
+  const prevOnlineRef = useRef({}) // instanceId -> online, so we can spot offline->online transitions
+  const [justOnline, setJustOnline] = useState(new Set())
+
+  // flags machines that just flipped offline->online so their sprite can flash briefly
+  useEffect(() => {
+    const prevOnline = prevOnlineRef.current
+    const newlyOnline = ownedMachines.filter((m) => m.online && prevOnline[m.instanceId] === false).map((m) => m.instanceId)
+    if (newlyOnline.length > 0) {
+      setJustOnline((prev) => new Set([...prev, ...newlyOnline]))
+      newlyOnline.forEach((id) => {
+        setTimeout(() => {
+          setJustOnline((prev) => {
+            const next = new Set(prev)
+            next.delete(id)
+            return next
+          })
+        }, 500)
+      })
+    }
+    prevOnlineRef.current = Object.fromEntries(ownedMachines.map((m) => [m.instanceId, m.online]))
+  }, [ownedMachines])
+
   // in connection mode, clicks select machines instead of opening the install/repair puzzle
   function handleClick(owned) {
     if (connectingMode) {
@@ -48,15 +71,20 @@ export default function MachineShelf({ ownedMachines, onSolve, connectingMode, s
         const machine = getMachineById(owned.machineId)
         const slot = SHELF_SLOTS[i]
         const isSelected = owned.instanceId === selectedMachineA
+        // failed = was online, broke down and needs repair; offline+no threshold = never installed yet
+        const isFailed = !owned.online && owned.failureThreshold != null
+        const justCameOnline = justOnline.has(owned.instanceId)
         return (
           <button
             key={owned.instanceId}
-            className={`shelf-machine${owned.online ? ' shelf-machine--online' : ''}${isSelected ? ' shelf-machine--selected' : ''}`}
+            className={`shelf-machine${owned.online ? ' shelf-machine--online' : ''}${isSelected ? ' shelf-machine--selected' : ''}${isFailed ? ' shelf-machine--failed' : ''}${justCameOnline ? ' shelf-machine--just-online' : ''}`}
             style={{ left: slot.x, top: slot.y }}
             onClick={() => handleClick(owned)}
             title={machine?.name ?? owned.machineId}
           >
             <img src={SHELF_SPRITE} alt={machine?.name ?? owned.machineId} />
+            {isFailed && <span className="shelf-machine-tint" />}
+            {isFailed && <span className="shelf-machine-warning">!</span>}
           </button>
         )
       })}

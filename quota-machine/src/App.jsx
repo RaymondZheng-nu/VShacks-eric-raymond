@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { createInitialState, bringMachineOnline, addConnection, QUOTA_CHECK_DAY, DAY_NAMES } from './game/gameState'
 import { advanceTurn } from './game/turn'
 import { generateDailyTasks } from './game/tasks'
@@ -21,6 +21,8 @@ import JournalPanel from './components/JournalPanel.jsx'
 import SettingsPanel from './components/SettingsPanel.jsx'
 import CircuitEditor from './components/CircuitEditor/CircuitEditor.jsx'
 import GameOver from './components/GameOver.jsx'
+import FloatingTextLayer from './components/FloatingTextLayer.jsx'
+import StartScreen from './components/StartScreen.jsx'
 
 const BACKGROUND = '/quota-machine/sprites/backdrop/Warehousebackdrop.png'
 const DEFAULT_CONNECTION_PUZZLE_ID = 'and-basic'
@@ -39,6 +41,10 @@ export default function App() {
   // set once two valid online machines are picked; gates the third CircuitEditor entry point
   const [connectingPuzzlePair, setConnectingPuzzlePair] = useState(null)
   const [connectMessage, setConnectMessage] = useState(null)
+  const [floatingTexts, setFloatingTexts] = useState([])
+  const prevStaminaRef = useRef(state.stamina)
+  const [staminaFlash, setStaminaFlash] = useState(false)
+  const [gameStarted, setGameStarted] = useState(false)
 
   // auto-clears transient connect-mode messages ("Machine must be online", "Already connected")
   useEffect(() => {
@@ -47,15 +53,44 @@ export default function App() {
     return () => clearTimeout(timer)
   }, [connectMessage])
 
-  // advances the game by one day
+  // sweeps out floating texts once their rise/fade animation has finished
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setFloatingTexts((prev) => prev.filter((ft) => Date.now() - ft.createdAt < 1500))
+    }, 500)
+    return () => clearInterval(interval)
+  }, [])
+
+  // briefly flashes the HUD stamina counter whenever stamina drops
+  useEffect(() => {
+    if (state.stamina < prevStaminaRef.current) {
+      setStaminaFlash(true)
+      const timer = setTimeout(() => setStaminaFlash(false), 300)
+      prevStaminaRef.current = state.stamina
+      return () => clearTimeout(timer)
+    }
+    prevStaminaRef.current = state.stamina
+  }, [state.stamina])
+
+  // spawns a floating chip/feedback label at a percentage-coordinate position
+  function pushFloatingText(text, x, y, color) {
+    setFloatingTexts((prev) => [...prev, { id: Date.now() + Math.random(), text, x, y, color, createdAt: Date.now() }])
+  }
+
+  // advances the game by one day, and shows machine income if any was earned
   function handleEndTurn() {
-    setState((prev) => advanceTurn(prev))
+    const next = advanceTurn(state)
+    if (next.lastDaySummary?.dailyCredits > 0) {
+      pushFloatingText(`+${next.lastDaySummary.dailyCredits}`, 85, 12, 'green')
+    }
+    setState(next)
   }
 
   // brings solved machine online
   function handleSolved() {
     // console.log('machine online:', solvingInstanceId)
     setState((prev) => bringMachineOnline(prev, solvingInstanceId))
+    pushFloatingText('-1 stamina', 15, 22, 'blue')
     setSolvingInstanceId(null)
   }
 
@@ -66,17 +101,23 @@ export default function App() {
 
   // puzzle solved: CircuitEditor already spent the stamina, so just mark the task done and close
   function handleTaskSolved() {
+    const task = state.tasks.find((t) => t.id === solvingTaskId)
     setState((prev) => ({
       ...prev,
       tasks: prev.tasks.map((t) => (t.id === solvingTaskId ? { ...t, done: true } : t)),
       totalTasksCompleted: (prev.totalTasksCompleted ?? 0) + 1,
     }))
+    if (task) pushFloatingText(`+${task.output} chips`, 15, 30, 'green')
+    pushFloatingText('-1 stamina', 15, 22, 'blue')
     setSolvingTaskId(null)
   }
 
-  // spends credits to level up an owned machine
+  // spends credits to level up an owned machine, and shows the cost spent
   function handleUpgradeMachine(instanceId) {
-    setState((prev) => upgradeMachine(prev, instanceId))
+    const next = upgradeMachine(state, instanceId)
+    const cost = state.credits - next.credits
+    if (cost > 0) pushFloatingText(`-${cost} credits`, 85, 12, 'red')
+    setState(next)
   }
 
   // resets to a fresh run and clears any open modal/puzzle/connect-mode state
@@ -130,6 +171,7 @@ export default function App() {
   // puzzle solved: CircuitEditor already spent the stamina, so just register the connection and close
   function handleConnectionSolved() {
     setState((prev) => addConnection(prev, connectingPuzzlePair.aId, connectingPuzzlePair.bId))
+    pushFloatingText('-1 stamina', 15, 22, 'blue')
     setConnectingPuzzlePair(null)
     setConnectingMode(false)
     setSelectedMachineA(null)
@@ -152,6 +194,11 @@ export default function App() {
 
   function togglePanel(key) {
     setActivePanel((prev) => (prev === key ? null : key))
+  }
+
+  // game state is already initialized above; this just gates what's rendered
+  if (!gameStarted) {
+    return <StartScreen onStart={() => setGameStarted(true)} />
   }
 
   const solvingMachine = state.ownedMachines.find((m) => m.instanceId === solvingInstanceId) // might be undefined if stale
@@ -188,6 +235,7 @@ export default function App() {
   return (
     <div className="app">
       <div className="game-canvas" style={{ backgroundImage: `url(${BACKGROUND})` }}>
+        <FloatingTextLayer floatingTexts={floatingTexts} />
         <RevenueBar credits={state.credits} />
         <MachineShelf
           ownedMachines={state.ownedMachines}
@@ -208,7 +256,9 @@ export default function App() {
 
         <div className="hud-topleft">
           <p className="hud-day-info">{DAY_NAMES[state.dayOfWeek - 1]}, Week {state.week}</p>
-          <p className="hud-stamina-info">Stamina: {state.stamina}/{state.maxStamina}</p>
+          <p className={`hud-stamina-info${staminaFlash ? ' hud-stamina-info--flash' : ''}${state.stamina <= 0 ? ' hud-stamina-info--empty' : ''}`}>
+            Stamina: {state.stamina}/{state.maxStamina}
+          </p>
           <TaskList tasks={state.tasks} stamina={state.stamina} onResolve={handleStartTask} />
         </div>
 
@@ -229,6 +279,7 @@ export default function App() {
               state={state}
               setState={setState}
               onReroll={handleReroll}
+              pushFloatingText={pushFloatingText}
             />
           </Modal>
         )}

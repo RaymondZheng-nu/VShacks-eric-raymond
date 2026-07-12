@@ -1,9 +1,10 @@
-// approx centers of 6 back wall shelves tune visually
+// centers of 6 back wall shelves, measured against the backdrop at 1280x800.
+// shifted right of the old values so slot 0 clears the tasks panel (was hidden behind it)
 export const SHELF_SLOTS = [
-  { x: '19.5%', y: '28%' },
-  { x: '28.1%', y: '28%' },
-  { x: '36.6%', y: '28%' },
-  { x: '45.1%', y: '28%' },
-  { x: '53.6%', y: '28%' },
-  { x: '62.1%', y: '28%' },
+  { x: '33.6%', y: '28%' },
+  { x: '41.4%', y: '28%' },
+  { x: '49.2%', y: '28%' },
+  { x: '57%', y: '28%' },
+  { x: '64.8%', y: '28%' },
+  { x: '72.7%', y: '28%' },
 ]

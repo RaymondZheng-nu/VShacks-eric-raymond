@@ -3,7 +3,7 @@ import { TASK_TYPES } from '../data/tasks'
 import { buyMachine, scaledCost, REROLL_COST } from '../game/shop'
 
 // renders shop with offers tooltips and reroll
-export default function Shop({ credits, week, shopOffers, state, setState, onReroll }) {
+export default function Shop({ credits, week, shopOffers, state, setState, onReroll, pushFloatingText }) {
   // attempts to buy a machine surfaces errors to console
   function handleBuy(machineId) {
     const { state: nextState, error } = buyMachine(state, machineId)
@@ -11,6 +11,7 @@ export default function Shop({ credits, week, shopOffers, state, setState, onRer
       console.warn('buyMachine failed:', error)
       return
     }
+    pushFloatingText(`-${state.credits - nextState.credits} credits`, 85, 12, 'red')
     setState(nextState)
   }
 
