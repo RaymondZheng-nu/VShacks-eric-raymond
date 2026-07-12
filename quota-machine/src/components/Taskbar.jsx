@@ -1,6 +1,6 @@
 const UI_BASE = '/quota-machine/sprites/ui'
 
-// stats/journal icons are best-guess mappings from available art — swap if wrong
+// stats and journal icons are best guess mappings swap if wrong
 const SLOTS = [
   { key: 'shop', icon: 'icon-shop.png', label: 'Shop' },
   { key: 'machines', icon: 'icon-machines.png', label: 'Machines' },
@@ -10,7 +10,7 @@ const SLOTS = [
   { key: 'endturn', icon: 'icon-endturn.png', label: 'End Turn' },
 ]
 
-// bottom-center nav: 6 boxes for Shop, Machines, Stats, Journal, Settings, End Turn
+// bottom center nav 6 boxes for shop machines stats journal settings end turn
 export default function Taskbar({ activePanel, onSelectPanel, onEndTurn, endTurnLabel, endTurnDisabled }) {
   return (
     <div className="taskbar" style={{ backgroundImage: `url(${UI_BASE}/taskbar.png)` }}>

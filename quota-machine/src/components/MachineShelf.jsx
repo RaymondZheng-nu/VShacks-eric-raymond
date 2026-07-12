@@ -3,8 +3,8 @@ import { SHELF_SLOTS } from '../data/shelfSlots'
 
 const SHELF_SPRITE = '/quota-machine/sprites/machines/generic.png'
 
-// auto-places owned machines on fixed shelf slots in purchase order — no drag/placement
-// TODO: swap SHELF_SPRITE for a per-machine sprite (owned.machineId / artKey) once that art exists
+// auto places owned machines on fixed shelf slots in purchase order
+// todo swap shelf sprite for per machine sprite once art exists
 export default function MachineShelf({ ownedMachines, onSolve }) {
   return (
     <>

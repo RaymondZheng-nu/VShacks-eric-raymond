@@ -1,6 +1,6 @@
 import { QUOTA_CHECK_DAY } from '../game/gameState'
 
-// Shows how many days remain until the Saturday quota deadline.
+// shows days until saturday quota deadline
 export default function QuotaDeadline({ week, dayOfWeek }) {
   const daysLeft = QUOTA_CHECK_DAY - dayOfWeek
   return (

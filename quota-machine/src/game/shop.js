@@ -5,20 +5,20 @@ export const INSUFFICIENT_CREDITS = 'INSUFFICIENT_CREDITS'
 export const UNKNOWN_MACHINE = 'UNKNOWN_MACHINE'
 export const REROLL_COST = 5
 
-// returns scaled cost based on current week
+// returns scaled cost based on week
 export function scaledCost(machine, week) {
   return Math.ceil(machine.cost * (1 + 0.15 * (week - 1)))
 }
 
-// picks 4 random machine ids for the shop this week
+// picks 4 random machine ids for the shop
 export function generateShopOffers(rng = Math.random) {
-  // not proper fisher-yates but honestly close enough for 6 items
+  // not proper fisher yates but close enough for 6 items
   const shuffled = [...MACHINES].sort(() => rng() - 0.5)
   const offerCount = 4
   return shuffled.slice(0, offerCount).map((m) => m.id)
 }
 
-// re-rolls shop offers if player has enough credits
+// rerolls shop offers if player has enough credits
 export function rerollShop(state, rng = Math.random) {
   if (state.credits < REROLL_COST) return { state, error: INSUFFICIENT_CREDITS }
   return {
@@ -27,7 +27,7 @@ export function rerollShop(state, rng = Math.random) {
   }
 }
 
-// deducts scaled cost and adds machine offline to ownedMachines
+// deducts scaled cost and adds machine offline
 export function buyMachine(state, machineId) {
   const machine = getMachineById(machineId)
   if (!machine) return { state, error: UNKNOWN_MACHINE }
@@ -42,7 +42,7 @@ export function buyMachine(state, machineId) {
     failureThreshold: null,
   }
 
-  // TODO: should we prevent buying duplicates?
+  // todo should we prevent buying duplicates
   return {
     state: {
       ...state,

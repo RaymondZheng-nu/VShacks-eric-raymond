@@ -21,7 +21,7 @@ import CircuitEditor from './components/CircuitEditor/CircuitEditor.jsx'
 
 const BACKGROUND = '/quota-machine/sprites/backdrop/Warehousebackdrop.png'
 
-// root component: owns game state and passes it to children
+// root component owns game state and passes it to children
 export default function App() {
   const [state, setState] = useState(() => {
     const s = createInitialState()
@@ -30,19 +30,19 @@ export default function App() {
   const [solvingInstanceId, setSolvingInstanceId] = useState(null)
   const [activePanel, setActivePanel] = useState(null)
 
-  // end of day — triggers scoring, failure ticks, new tasks
+  // end of day triggers scoring failure ticks new tasks
   function handleEndTurn() {
     setState((prev) => advanceTurn(prev))
   }
 
-  // brings the solved machine online
+  // brings solved machine online
   function handleSolved() {
     // console.log('machine online:', solvingInstanceId)
     setState((prev) => bringMachineOnline(prev, solvingInstanceId))
     setSolvingInstanceId(null)
   }
 
-  // resolves a task manually spending stamina
+  // resolves task manually spending stamina
   function handleResolveTask(taskId) {
     setState((prev) => {
       const result = resolveTaskManually(prev, taskId)
@@ -50,7 +50,7 @@ export default function App() {
     })
   }
 
-  // re-rolls shop offers if credits allow
+  // rerolls shop offers if credits allow
   function handleReroll() {
     setState((prev) => {
       const { state: next, error } = rerollShop(prev)
@@ -62,8 +62,8 @@ export default function App() {
     setActivePanel((prev) => (prev === key ? null : key))
   }
 
-  const solvingMachine = state.ownedMachines.find((m) => m.instanceId === solvingInstanceId) // solvingMachine might be undefined if instanceId is stale, that's fine
-  // use harder repair puzzle if the machine has failed before (failureThreshold gets set on first activation)
+  const solvingMachine = state.ownedMachines.find((m) => m.instanceId === solvingInstanceId) // might be undefined if stale
+  // use harder repair puzzle if machine has failed before
   const isRepair = solvingMachine != null && solvingMachine.failureThreshold != null
   const solvingPuzzle = solvingMachine
     ? getPuzzleById(
@@ -124,9 +124,7 @@ export default function App() {
         {activePanel === 'journal' && <JournalPanel onClose={() => setActivePanel(null)} />}
         {activePanel === 'settings' && <SettingsPanel onClose={() => setActivePanel(null)} />}
 
-        {/* TODO: machine-to-machine connection puzzles for synergy bonuses —
-            select two owned machines, open CircuitEditor with the synergy's
-            puzzleId, call gameState.addConnection() on solve */}
+        {/* todo machine to machine connection puzzles for synergy bonuses */}
 
         {solvingPuzzle && (
           <div className="circuit-editor-overlay">

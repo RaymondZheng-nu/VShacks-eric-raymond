@@ -1,6 +1,6 @@
 const UI_BASE = '/quota-machine/sprites/ui'
 
-// pinned top-right; glow overlay flips color on credits sign
+// pinned top right glow flips color on credits sign
 export default function RevenueBar({ credits }) {
   const glow = credits >= 0 ? 'revenue-glow-green.png' : 'revenue-glow-red.png'
 

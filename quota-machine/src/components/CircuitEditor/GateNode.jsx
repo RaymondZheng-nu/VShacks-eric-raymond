@@ -13,7 +13,7 @@ const GATE_SPRITE = {
   OUTPUT: `${BASE}/DC.png`,
 }
 
-// Renders a single gate or pin as a clickable button with its sprite.
+// renders a single gate or pin as a clickable button
 export default function GateNode({ node, selected, onSelect }) {
   const sprite = GATE_SPRITE[node.type]
   return (

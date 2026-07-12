@@ -1,4 +1,4 @@
-// Displays today's tasks and lets the player resolve them manually.
+// displays todays tasks lets the player resolve them
 export default function TaskList({ tasks, stamina, onResolve }) {
   return (
     <section className="task-list">
@@ -21,7 +21,7 @@ export default function TaskList({ tasks, stamina, onResolve }) {
               )}
               {!task.done && !task.automated && (
                 <>
-                  {/* TODO: show stamina cost as pips not text */}
+                  {/* todo show stamina cost as pips not text */}
                   <button onClick={() => onResolve(task.id)} disabled={stamina <= 0}>
                     Do it ({task.staminaCost} stamina)
                   </button>

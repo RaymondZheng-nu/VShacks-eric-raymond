@@ -1,4 +1,4 @@
-// Renders the weekly quota progress bar.
+// renders weekly quota progress bar
 export default function QuotaBar({ quotaProgress, quotaRequired }) {
   const pct = Math.min(100, Math.round((quotaProgress / quotaRequired) * 100))
 

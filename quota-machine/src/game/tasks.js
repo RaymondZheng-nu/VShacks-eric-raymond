@@ -1,7 +1,7 @@
 import { TASK_TYPES } from '../data/tasks'
 import { MAX_STAMINA } from './gameState'
 
-// picks 3-5 random tasks, marks automated if machine online
+// picks 3 to 5 random tasks marks automated if machine online
 export function generateDailyTasks(state, rng = Math.random) {
   const count = 3 + Math.floor(rng() * 3)
 
@@ -27,14 +27,14 @@ export function generateDailyTasks(state, rng = Math.random) {
   }))
 }
 
-// marks a task done and spends 1 stamina
+// marks task done and spends stamina
 export function resolveTaskManually(state, taskId) {
   const task = (state.tasks ?? []).find((t) => t.id === taskId)
   if (!task) return { ok: false, reason: 'task not found', state }
   if (task.done) return { ok: false, reason: 'task already done', state }
   if (state.stamina <= 0) return { ok: false, reason: 'out of stamina', state }
 
-  // chips from tasks get counted at eod via resolveScore, not here
+  // chips from tasks counted at eod not here
   return {
     ok: true,
     state: {

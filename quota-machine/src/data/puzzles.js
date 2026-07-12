@@ -73,7 +73,7 @@ export const PUZZLES = [
   },
 ]
 
-// returns undefined if missing (same as Array.find)
+// returns undefined if missing
 export function getPuzzleById(id) {
   return PUZZLES.find((p) => p.id === id)
 }

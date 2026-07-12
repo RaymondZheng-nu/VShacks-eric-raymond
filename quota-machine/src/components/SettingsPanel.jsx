@@ -1,7 +1,7 @@
 import Modal from './Modal.jsx'
 
-// Stub — no settings content yet.
-// Props: { onClose: () => void }
+// stub no settings content yet
+// props onclose
 export default function SettingsPanel({ onClose }) {
   return (
     <Modal title="Settings" onClose={onClose}>

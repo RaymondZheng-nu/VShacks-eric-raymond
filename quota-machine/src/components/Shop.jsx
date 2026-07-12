@@ -2,9 +2,9 @@ import { MACHINES } from '../data/machines'
 import { TASK_TYPES } from '../data/tasks'
 import { buyMachine, scaledCost, REROLL_COST } from '../game/shop'
 
-// renders the shop with offers, tooltips, and reroll
+// renders shop with offers tooltips and reroll
 export default function Shop({ credits, week, shopOffers, state, setState, onReroll }) {
-  // attempts to buy a machine and surfaces errors to console
+  // attempts to buy a machine surfaces errors to console
   function handleBuy(machineId) {
     const { state: nextState, error } = buyMachine(state, machineId)
     if (error) {
@@ -25,7 +25,7 @@ export default function Shop({ credits, week, shopOffers, state, setState, onRer
         {machinesToShow.map((machine) => {
           const cost = scaledCost(machine, week ?? 1)
           const automatesTask = TASK_TYPES.find((t) => t.automationMachineId === machine.id)
-          // TODO: show rarity somewhere
+          // todo show rarity somewhere
           return (
             <li key={machine.id} className="shop-item">
               <div className="shop-item-row">

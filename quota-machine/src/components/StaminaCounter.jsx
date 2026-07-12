@@ -1,4 +1,4 @@
-// Shows remaining stamina for circuit-solving actions this day.
+// shows remaining stamina for this day
 export default function StaminaCounter({ stamina, maxStamina }) {
   return (
     <section className="stamina-counter">

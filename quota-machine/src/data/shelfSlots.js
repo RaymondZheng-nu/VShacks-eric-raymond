@@ -1,4 +1,4 @@
-// approx centers (% of viewport) of the 6 back-wall shelves in background.png — tune visually
+// approx centers of 6 back wall shelves tune visually
 export const SHELF_SLOTS = [
   { x: '19.5%', y: '28%' },
   { x: '28.1%', y: '28%' },

@@ -1,4 +1,4 @@
-// renders the day summary panel; returns null if no summary
+// renders day summary returns null if no summary
 export default function DaySummary({ summary }) {
   if (!summary) return null
 

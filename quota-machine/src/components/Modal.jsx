@@ -1,4 +1,4 @@
-// Props: { title: string, onClose: () => void, children }
+// props title onclose children
 export default function Modal({ title, onClose, children }) {
   return (
     <div className="modal-backdrop" onClick={onClose}>

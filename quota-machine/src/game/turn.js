@@ -15,7 +15,7 @@ export function rollFailureThreshold(rng = Math.random) {
   return FAILURE_MIN_TURNS + Math.floor(rng() * span)
 }
 
-// does everything for end of turn, probably too much in one function
+// does everything for end of turn probably too much
 export function advanceTurn(state, rng = Math.random) {
   const isQuotaDay = state.dayOfWeek === QUOTA_CHECK_DAY // saturday
 
@@ -53,7 +53,7 @@ export function advanceTurn(state, rng = Math.random) {
       creditsEarned = CREDITS_PER_QUOTA_PASS
       credits += CREDITS_PER_QUOTA_PASS
       quotaProgress = Math.max(0, quotaProgress - quotaRequired)
-      quotaRequired = Math.ceil(quotaRequired * 1.15) // 15% ramp per week, TODO: tune this
+      quotaRequired = Math.ceil(quotaRequired * 1.15) // 15 percent ramp per week todo tune this
       week += 1
       dayOfWeek = 1
       shopOffers = generateShopOffers(rng)
@@ -101,7 +101,7 @@ export function advanceTurn(state, rng = Math.random) {
   return { ...nextState, tasks }
 }
 
-// spends 1 stamina; returns ok false if already zero
+// spends stamina returns ok false if already zero
 export function spendStamina(state) {
   if (state.stamina <= 0) return { ok: false, reason: 'out of stamina', state }
   return { ok: true, state: { ...state, stamina: state.stamina - 1 } }

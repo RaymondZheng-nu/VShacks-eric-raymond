@@ -1,6 +1,6 @@
 import { getMachineById } from '../data/machines'
 
-// lists every owned machine; offline ones can be installed/repaired via onSolve
+// lists every owned machine offline ones can be installed or repaired
 export default function MachineYard({ ownedMachines, onSolve }) {
   return (
     <section className="machine-yard">
@@ -9,7 +9,7 @@ export default function MachineYard({ ownedMachines, onSolve }) {
         <p>No machines yet — visit the shop.</p>
       ) : (
         <>
-        {/* TODO: drag and drop someday */}
+        {/* todo drag and drop someday */}
         <ul className="machine-yard-list">
           {ownedMachines.map((owned) => {
             const machine = getMachineById(owned.machineId)

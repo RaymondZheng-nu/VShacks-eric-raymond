@@ -48,7 +48,7 @@ export const TASK_TYPES = [
     automationMachineId: 'packager',
   },
   // { id: 'debug', name: 'Debug Console', description: 'Check error logs.', baseOutput: 1, staminaCost: 1, automationMachineId: null },
-  // ^ removed, too punishing
+  // removed too punishing
   {
     id: 'inspect',
     name: 'Quality Inspect',
@@ -59,7 +59,7 @@ export const TASK_TYPES = [
   },
 ]
 
-// returns undefined if not found (just use find directly tbh)
+// returns undefined if not found
 export function getTaskTypeById(id) {
   return TASK_TYPES.find((t) => t.id === id)
 }

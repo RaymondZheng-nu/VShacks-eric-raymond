@@ -20,13 +20,13 @@ const GATE_FNS = {
   BUFFER: (ins) => Boolean(ins[0]),
 }
 
-// Evaluates a node graph and returns { [outputId]: boolean } for every OUTPUT node.
+// evaluates node graph and returns output booleans
 export function evaluateCircuit(nodes, inputValues) {
   const nodeMap = new Map(nodes.map((n) => [n.id, n])) // was byId
   const resolved = new Map()
   const inProgress = new Set()
 
-  // Recursively resolves a single node id to its boolean value.
+  // recursively resolves node id to boolean
   function resolve(id) {
     if (resolved.has(id)) return resolved.get(id)
     const node = nodeMap.get(id)
@@ -76,7 +76,7 @@ export function evaluateCircuit(nodes, inputValues) {
   return outputs
 }
 
-// Builds a full truth-table spec from a boolean function; MSB-first input ordering.
+// builds truth table spec from a boolean function msb first
 export function genSpec(inputIds, outputIds, fn) {
   const rows = []
   const n = inputIds.length
@@ -100,7 +100,7 @@ export function genSpec(inputIds, outputIds, fn) {
   return { inputIds, outputIds, rows }
 }
 
-// Runs every truth-table row against the player's circuit; returns { pass, failedRow, results }.
+// runs every truth table row against the circuit
 export function validateCircuit(nodes, spec) {
   const results = []
 

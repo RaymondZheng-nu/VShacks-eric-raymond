@@ -1,4 +1,4 @@
-// baseOutput is basically the same as chips but shop tooltip uses it, TODO clean up
+// baseoutput same as chips but tooltip uses it todo clean up
 export const MACHINES = [
   {
     id: 'conveyor',
@@ -63,7 +63,7 @@ export const MACHINES = [
   {
     id: 'packager',
     name: 'Auto Packager',
-    cost: 30, // same as welder, intentional
+    cost: 30, // same as welder intentional
     chips: 8,
     multBonus: 0,
     baseOutput: 8,
@@ -74,7 +74,7 @@ export const MACHINES = [
   },
 ]
 
-// find machine by id, returns undefined if missing
+// find machine by id returns undefined if missing
 export function getMachineById(id) {
   return MACHINES.find((m) => m.id === id)
 }

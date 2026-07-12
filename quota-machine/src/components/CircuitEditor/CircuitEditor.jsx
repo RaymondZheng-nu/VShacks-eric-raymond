@@ -3,14 +3,14 @@ import Grid from './Grid.jsx'
 import { validateCircuit, GATE_TYPES } from '../../engine/circuit-engine.js'
 import { spendStamina } from '../../game/turn.js'
 
-// Returns the starting input/output nodes for a puzzle with no gates placed yet.
+// returns initial nodes for a puzzle
 function buildInitialNodes(puzzle) {
   const inputNodes = puzzle.spec.inputIds.map((id) => ({ id, type: GATE_TYPES.INPUT }))
   const outputNodes = puzzle.spec.outputIds.map((id) => ({ id, type: GATE_TYPES.OUTPUT, inputs: [] }))
   return [...inputNodes, ...outputNodes]
 }
 
-// Modal circuit builder: lets the player wire gates to satisfy a puzzle's truth table.
+// modal circuit builder lets player wire gates to satisfy truth table
 export default function CircuitEditor({ puzzle, isRepair, gameState, setGameState, onSolved, onCancel }) {
   const [nodes, setNodes] = useState(() => buildInitialNodes(puzzle))
   const [pendingSource, setPendingSource] = useState(null)
@@ -24,15 +24,15 @@ export default function CircuitEditor({ puzzle, isRepair, gameState, setGameStat
     gateCounter.current = 0
   }, [puzzle.id])
 
-  // old approach was storing gates separately from wires, merged them into nodes
-  // Adds a new gate node of the given type to the canvas.
+  // old approach stored gates separately merged into nodes
+  // adds a new gate node to the canvas
   function addGate(type) {
     gateCounter.current += 1
     const id = `gate-${type.toLowerCase()}-${gateCounter.current}`
     setNodes((prev) => [...prev, { id, type, inputs: [] }])
   }
 
-  // Handles a node click: starts a wire from a source or completes a wire to a target.
+  // node click starts wire from source or completes it to target
   function handleSelectNode(node) {
     if (pendingSource === null) {
       if (node.type === GATE_TYPES.OUTPUT) return
@@ -58,7 +58,7 @@ export default function CircuitEditor({ puzzle, isRepair, gameState, setGameStat
     setPendingSource(null)
   }
 
-  // Removes the wire at the given index from a node's inputs array.
+  // removes wire at index from node inputs
   function clearWire(nodeId, wireIndex) {
     setNodes((prev) =>
       prev.map((n) =>
@@ -67,7 +67,7 @@ export default function CircuitEditor({ puzzle, isRepair, gameState, setGameStat
     )
   }
 
-  // Validates the circuit; on pass spends 1 stamina and calls onSolved.
+  // validates circuit on pass spends stamina and calls onsolved
   function handleCheck() {
     if (gameState.stamina <= 0) {
       setResult({ pass: false, message: 'Out of stamina — wait for next turn.' })
@@ -80,7 +80,7 @@ export default function CircuitEditor({ puzzle, isRepair, gameState, setGameStat
       return
     }
 
-    // stamina gets checked twice (here + inside spendStamina) but w/e
+    // stamina checked twice here and inside spendstamina
     const spend = spendStamina(gameState)
     if (!spend.ok) {
       setResult({ pass: false, message: 'Out of stamina — wait for next turn.' })

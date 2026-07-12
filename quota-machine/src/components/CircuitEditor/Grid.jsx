@@ -1,6 +1,6 @@
 import GateNode from './GateNode.jsx'
 
-// Renders placed circuit nodes in three fixed columns: Inputs, Gates, Outputs.
+// renders circuit nodes in three fixed columns inputs gates outputs
 export default function Grid({ puzzle, nodes, pendingSource, onSelectNode, onClearWire }) {
   const inputNodes = nodes.filter((n) => n.type === 'INPUT')
   const outputNodes = nodes.filter((n) => n.type === 'OUTPUT')
