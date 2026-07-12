@@ -10,7 +10,7 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "predeploy": "npm run build",
-    "deploy": "gh-pages -d dist"
+    "deploy": "gh-pages -d dist --dest quota-machine"
   },
   "dependencies": {
     "react": "^18.3.1",

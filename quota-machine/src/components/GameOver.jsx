@@ -1,6 +1,6 @@
-// full-screen shutdown screen shown when state.isGameOver is true
+// full-screen end state — went through several names (Bankrupt, Shutdown, Game Over) before landing here
 export default function GameOver({ state, onRestart }) {
-  const machinesOnline = state.ownedMachines.filter((m) => m.online).length
+  const machinesOnline = state.ownedMachines.filter((m) => m.online).length // same calc is in StatsPanel, should centralize
 
   return (
     <div className="game-over-overlay">

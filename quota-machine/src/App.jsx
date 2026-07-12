@@ -24,7 +24,7 @@ import GameOver from './components/GameOver.jsx'
 import FloatingTextLayer from './components/FloatingTextLayer.jsx'
 import StartScreen from './components/StartScreen.jsx'
 
-const BACKGROUND = '/quota-machine/sprites/backdrop/Warehousebackdrop.png'
+const BACKGROUND = `${import.meta.env.BASE_URL}sprites/backdrop/Warehousebackdrop.png`
 const DEFAULT_CONNECTION_PUZZLE_ID = 'and-basic'
 
 // root component owns game state and passes it to children
@@ -94,7 +94,7 @@ export default function App() {
     setSolvingInstanceId(null)
   }
 
-  // opens the circuit puzzle for a task instead of insta-completing it
+  // name is wrong, this opens the puzzle modal not a manual resolve — TODO rename
   function handleStartTask(taskId) {
     setSolvingTaskId(taskId)
   }
@@ -120,7 +120,7 @@ export default function App() {
     setState(next)
   }
 
-  // resets to a fresh run and clears any open modal/puzzle/connect-mode state
+  // resets to a fresh run — wish we had a reducer for all this clearing
   function handleRestart() {
     const s = createInitialState()
     setState({ ...s, tasks: generateDailyTasks(s), shopOffers: generateShopOffers() })
@@ -141,7 +141,7 @@ export default function App() {
     setConnectMessage(null)
   }
 
-  // handles a shelf-machine click while in connection mode
+  // shelf click handler in connect mode — ended up doing more than expected
   function handleConnectClick(owned) {
     if (!owned.online) {
       setConnectMessage('Machine must be online')

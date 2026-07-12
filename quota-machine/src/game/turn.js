@@ -37,7 +37,7 @@ export function advanceTurn(state, rng = Math.random) {
     synergyCatalog: FEATURED_SYNERGIES,
   })
 
-  const dailyCredits = ownedMachines.filter((m) => m.online).length
+  const dailyCredits = ownedMachines.filter((m) => m.online).length // one credit per online machine, name is a bit misleading
 
   let quotaProgress = state.quotaProgress + score.total
   let { quotaRequired, credits, week, isGameOver, debt } = state
@@ -68,7 +68,7 @@ export function advanceTurn(state, rng = Math.random) {
       week += 1
       dayOfWeek = 1
       shopOffers = generateShopOffers(rng)
-      isGameOver = debt > DEBT_CUTOFF
+      isGameOver = debt > DEBT_CUTOFF // used to be instant game over on quota fail, debt system came later
     }
   } else {
     dayOfWeek += 1

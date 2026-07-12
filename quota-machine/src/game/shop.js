@@ -15,7 +15,7 @@ export function scaledCost(machine, week) {
 export function generateShopOffers(rng = Math.random) {
   // not proper fisher yates but close enough for 6 items
   const shuffled = [...MACHINES].sort(() => rng() - 0.5)
-  const offerCount = 4
+  const offerCount = 4 // TODO make this a top-level const
   return shuffled.slice(0, offerCount).map((m) => m.id)
 }
 
@@ -55,7 +55,7 @@ export function buyMachine(state, machineId) {
   }
 }
 
-// cost to go from currentLevel to currentLevel + 1
+// 1.5x base cost per level — felt right after playtesting, don't tweak without re-testing balance
 export function upgradeCost(machine, currentLevel) {
   return Math.ceil(machine.cost * 1.5 * currentLevel)
 }
@@ -68,7 +68,7 @@ export function upgradeMachine(state, instanceId) {
   if (!machine) return state
 
   const level = owned.level ?? 1
-  if (level >= MAX_MACHINE_LEVEL) return state
+  if (level >= MAX_MACHINE_LEVEL) return state // silently no-ops; button should be greyed out anyway
 
   const cost = upgradeCost(machine, level)
   if (state.credits < cost) return state

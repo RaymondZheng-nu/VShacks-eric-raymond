@@ -2,14 +2,14 @@ import { useEffect, useRef, useState } from 'react'
 import { getMachineById } from '../data/machines'
 import { SHELF_SLOTS } from '../data/shelfSlots'
 
-const SHELF_SPRITE = '/quota-machine/sprites/machines/generic.png'
+const SHELF_SPRITE = `${import.meta.env.BASE_URL}sprites/machines/generic.png`
 
-// looks up a shelved machine's slot center as numbers, or null if it isn't on the shelf
+// returns slot position as plain numbers or null if not on shelf
 function slotPositionFor(instanceId, ownedMachines) {
   const index = ownedMachines.slice(0, SHELF_SLOTS.length).findIndex((m) => m.instanceId === instanceId)
   if (index === -1) return null
   const slot = SHELF_SLOTS[index]
-  return { x: parseFloat(slot.x), y: parseFloat(slot.y) }
+  return { x: parseFloat(slot.x), y: parseFloat(slot.y) } // parseFloat strips the '%' from shelfSlots strings
 }
 
 // auto-places owned machines on fixed shelf slots in purchase order — no drag/placement

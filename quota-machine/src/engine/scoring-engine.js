@@ -30,6 +30,7 @@ export function resolveScore({ ownedMachines, connections = [], tasks = [], part
     contributions.push({ source: task.name, type: 'chips', value: task.output })
   }
 
+  // chips first then synergy xmult — took a while to get the ordering right
   for (const conn of connections) {
     if (!conn.solved) continue
     const [idA, idB] = conn.machineInstanceIds
@@ -44,7 +45,7 @@ export function resolveScore({ ownedMachines, connections = [], tasks = [], part
     const xmult = synergy?.multiplier ?? DEFAULT_SYNERGY_XMULT
     mult *= xmult
 
-    // todo cache part lookups
+    // two find() calls per connection in a loop, but we cap at 6 machines so whatever
     const nameA = partCatalog.find((p) => p.id === ownedA.machineId)?.name ?? ownedA.machineId
     const nameB = partCatalog.find((p) => p.id === ownedB.machineId)?.name ?? ownedB.machineId
     contributions.push({ source: `${nameA} ↔ ${nameB}`, type: 'xmult', value: xmult })

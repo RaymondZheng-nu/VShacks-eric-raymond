@@ -1,4 +1,4 @@
-const UI_BASE = '/quota-machine/sprites/ui'
+const UI_BASE = `${import.meta.env.BASE_URL}sprites/ui`
 
 // pinned top right glow flips color on credits sign
 export default function RevenueBar({ credits }) {

@@ -1,4 +1,4 @@
-const SPRITE_BASE = '/quota-machine/sprites/player'
+const SPRITE_BASE = `${import.meta.env.BASE_URL}sprites/player`
 
 // returns sprite path based on quota completion
 function getSpriteForQuota(quotaProgress, quotaRequired) {

@@ -37,7 +37,7 @@ export function nextInstanceId(prefix) {
 }
 
 // marks machine online after solve
-export function bringMachineOnline(state, instanceId, rand = Math.random) {
+export function bringMachineOnline(state, instanceId, rand = Math.random) { // rand not rng, typo that stuck
   return {
     ...state,
     ownedMachines: state.ownedMachines.map((m) =>

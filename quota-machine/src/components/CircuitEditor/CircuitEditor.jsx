@@ -24,7 +24,7 @@ export default function CircuitEditor({ puzzle, isRepair, gameState, setGameStat
     gateCounter.current = 0
   }, [puzzle.id])
 
-  // old approach stored gates separately merged into nodes
+  // was storing gates and wires as separate lists — merged them when we realized they're basically the same shape
   // adds a new gate node to the canvas
   function addGate(type) {
     gateCounter.current += 1
@@ -80,7 +80,7 @@ export default function CircuitEditor({ puzzle, isRepair, gameState, setGameStat
       return
     }
 
-    // stamina checked twice here and inside spendstamina
+    // belt and suspenders i know
     const spend = spendStamina(gameState)
     if (!spend.ok) {
       setResult({ pass: false, message: 'Out of stamina — wait for next turn.' })
@@ -101,7 +101,7 @@ export default function CircuitEditor({ puzzle, isRepair, gameState, setGameStat
         {puzzle.allowedGates.map((type) => (
           <button key={type} className="palette-btn" onClick={() => addGate(type)}>
             <img
-              src={`/quota-machine/sprites/circuits/${type}.png`}
+              src={`${import.meta.env.BASE_URL}sprites/circuits/${type}.png`}
               alt={type}
               className="palette-sprite"
               onError={(e) => { e.currentTarget.style.display = 'none' }}

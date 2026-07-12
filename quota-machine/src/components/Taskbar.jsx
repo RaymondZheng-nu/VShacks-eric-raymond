@@ -1,4 +1,4 @@
-const UI_BASE = '/quota-machine/sprites/ui'
+const UI_BASE = `${import.meta.env.BASE_URL}sprites/ui`
 
 // stats and journal icons are best guess mappings swap if wrong
 const SLOTS = [

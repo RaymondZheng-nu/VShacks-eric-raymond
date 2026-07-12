@@ -16,7 +16,7 @@ export default function StatsPanel({
   connections,
 }) {
   const machinesOnline = ownedMachines.filter((m) => m.online).length
-  const machinesFailed = ownedMachines.filter((m) => !m.online && m.failureThreshold != null).length
+  const machinesFailed = ownedMachines.filter((m) => !m.online && m.failureThreshold != null).length // "failed" = broke and needs repair, not permanently gone
 
   return (
     <>

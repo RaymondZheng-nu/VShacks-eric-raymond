@@ -24,7 +24,7 @@ const GATE_FNS = {
 export function evaluateCircuit(nodes, inputValues) {
   const nodeMap = new Map(nodes.map((n) => [n.id, n])) // was byId
   const resolved = new Map()
-  const inProgress = new Set()
+  const inProgress = new Set() // Set not array so .has() is O(1)
 
   // recursively resolves node id to boolean
   function resolve(id) {
@@ -39,7 +39,7 @@ export function evaluateCircuit(nodes, inputValues) {
       return value
     }
 
-    if (inProgress.has(id)) throw new Error(`Cycle detected in circuit at node "${id}"`)
+    if (inProgress.has(id)) throw new Error(`Cycle detected in circuit at node "${id}"`) // this bug took forever to track down
     inProgress.add(id)
 
     const inputIds = node.inputs || []
