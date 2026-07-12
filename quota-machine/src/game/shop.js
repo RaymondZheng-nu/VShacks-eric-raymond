@@ -40,7 +40,6 @@ export function buyMachine(state, machineId) {
     online: false,
     turnsSinceSolved: 0,
     failureThreshold: null,
-    position: null,
   }
 
   // TODO: should we prevent buying duplicates?

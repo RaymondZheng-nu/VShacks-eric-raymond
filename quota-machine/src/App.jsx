@@ -1,22 +1,25 @@
 import { useState } from 'react'
-import { createInitialState, bringMachineOnline } from './game/gameState'
-import { placeMachine, removeMachineFromRack } from './game/rack'
+import { createInitialState, bringMachineOnline, QUOTA_CHECK_DAY, DAY_NAMES } from './game/gameState'
 import { advanceTurn } from './game/turn'
 import { generateDailyTasks, resolveTaskManually } from './game/tasks'
 import { generateShopOffers, rerollShop } from './game/shop'
 import { getMachineById } from './data/machines'
 import { getPuzzleById } from './data/puzzles'
-import QuotaBar from './components/QuotaBar.jsx'
-import DebtCounter from './components/DebtCounter.jsx'
-import StaminaCounter from './components/StaminaCounter.jsx'
 import TaskList from './components/TaskList.jsx'
+import DaySummary from './components/DaySummary.jsx'
+import PlayerSprite from './components/PlayerSprite.jsx'
+import Taskbar from './components/Taskbar.jsx'
+import RevenueBar from './components/RevenueBar.jsx'
+import MachineShelf from './components/MachineShelf.jsx'
+import Modal from './components/Modal.jsx'
 import Shop from './components/Shop.jsx'
 import MachineYard from './components/MachineYard.jsx'
-import Rack from './components/Rack.jsx'
-import TurnControls from './components/TurnControls.jsx'
+import StatsPanel from './components/StatsPanel.jsx'
+import JournalPanel from './components/JournalPanel.jsx'
+import SettingsPanel from './components/SettingsPanel.jsx'
 import CircuitEditor from './components/CircuitEditor/CircuitEditor.jsx'
-import PlayerSprite from './components/PlayerSprite.jsx'
-import DaySummary from './components/DaySummary.jsx'
+
+const BACKGROUND = '/quota-machine/sprites/backdrop/Warehousebackdrop.png'
 
 // root component: owns game state and passes it to children
 export default function App() {
@@ -25,7 +28,7 @@ export default function App() {
     return { ...s, tasks: generateDailyTasks(s), shopOffers: generateShopOffers() }
   })
   const [solvingInstanceId, setSolvingInstanceId] = useState(null)
-  const [pendingPlacement, setPendingPlacement] = useState(null)
+  const [activePanel, setActivePanel] = useState(null)
 
   // end of day — triggers scoring, failure ticks, new tasks
   function handleEndTurn() {
@@ -47,48 +50,16 @@ export default function App() {
     })
   }
 
-  // sets a machine as pending placement
-  function handleSelectInventory(instanceId) {
-    setPendingPlacement(instanceId)
-    setSolvingInstanceId(null)
-  }
-
-  // places the pending machine into the clicked rack slot
-  function handleRackSlotClick(row, col) {
-    if (!pendingPlacement) return
-    setState((prev) => {
-      const result = placeMachine(prev, pendingPlacement, row, col)
-      return result.ok ? result.state : prev
-    })
-    setPendingPlacement(null)
-  }
-
-  // handles clicking a filled rack slot: swaps or opens puzzle
-  function handleRackMachineClick(owned) {
-    if (pendingPlacement) {
-      // TODO: this swap feels clunky, maybe show a confirm or animation
-      setState((prev) => {
-        const withRemoved = removeMachineFromRack(prev, owned.instanceId)
-        const result = placeMachine(withRemoved, pendingPlacement, owned.position.row, owned.position.col)
-        return result.ok ? result.state : prev
-      })
-      setPendingPlacement(null)
-      return
-    }
-    if (!owned.online) setSolvingInstanceId(owned.instanceId)
-  }
-
-  // removes a machine from the rack back to inventory
-  function handleRemoveFromRack(instanceId) {
-    setState((prev) => removeMachineFromRack(prev, instanceId))
-  }
-
   // re-rolls shop offers if credits allow
   function handleReroll() {
     setState((prev) => {
       const { state: next, error } = rerollShop(prev)
       return error ? prev : next
     })
+  }
+
+  function togglePanel(key) {
+    setActivePanel((prev) => (prev === key ? null : key))
   }
 
   const solvingMachine = state.ownedMachines.find((m) => m.instanceId === solvingInstanceId) // solvingMachine might be undefined if instanceId is stale, that's fine
@@ -104,56 +75,74 @@ export default function App() {
 
   return (
     <div className="app">
-      <header className="app-header">
-        <h1>Quota Machine</h1>
-      </header>
+      <div className="game-canvas" style={{ backgroundImage: `url(${BACKGROUND})` }}>
+        <RevenueBar credits={state.credits} />
+        <MachineShelf ownedMachines={state.ownedMachines} onSolve={setSolvingInstanceId} />
 
-      <main className="app-main">
-        <QuotaBar quotaProgress={state.quotaProgress} quotaRequired={state.quotaRequired} />
-        <DebtCounter week={state.week} dayOfWeek={state.dayOfWeek} />
-        <StaminaCounter stamina={state.stamina} maxStamina={state.maxStamina} />
-        <TaskList tasks={state.tasks} stamina={state.stamina} onResolve={handleResolveTask} />
-        <DaySummary summary={state.lastDaySummary} />
+        <div className="hud-topleft">
+          <p className="hud-day-info">{DAY_NAMES[state.dayOfWeek - 1]}, Week {state.week}</p>
+          <TaskList tasks={state.tasks} stamina={state.stamina} onResolve={handleResolveTask} />
+        </div>
 
-        <Shop
-          credits={state.credits}
-          week={state.week}
-          shopOffers={state.shopOffers}
-          state={state}
-          setState={setState}
-          onReroll={handleReroll}
-        />
-        <MachineYard
-          ownedMachines={state.ownedMachines}
-          selectedInstanceId={pendingPlacement}
-          onSelect={handleSelectInventory}
-        />
-        <Rack
-          ownedMachines={state.ownedMachines}
-          pendingInstanceId={pendingPlacement}
-          onSlotClick={handleRackSlotClick}
-          onMachineClick={handleRackMachineClick}
-          onRemove={handleRemoveFromRack}
+        <Taskbar
+          activePanel={activePanel}
+          onSelectPanel={togglePanel}
+          onEndTurn={handleEndTurn}
+          endTurnLabel={state.dayOfWeek === QUOTA_CHECK_DAY ? 'End Week (Quota Check)' : 'End Day'}
+          endTurnDisabled={state.isGameOver}
         />
 
-        {solvingPuzzle && (
-          <CircuitEditor
-            puzzle={solvingPuzzle}
-            isRepair={isRepair}
-            gameState={state}
-            setGameState={setState}
-            onSolved={handleSolved}
-            onCancel={() => setSolvingInstanceId(null)}
-          />
+        {activePanel === 'shop' && (
+          <Modal title="Shop" onClose={() => setActivePanel(null)}>
+            <Shop
+              credits={state.credits}
+              week={state.week}
+              shopOffers={state.shopOffers}
+              state={state}
+              setState={setState}
+              onReroll={handleReroll}
+            />
+          </Modal>
         )}
+        {activePanel === 'machines' && (
+          <Modal title="Machines" onClose={() => setActivePanel(null)}>
+            <MachineYard ownedMachines={state.ownedMachines} onSolve={setSolvingInstanceId} />
+          </Modal>
+        )}
+        {activePanel === 'stats' && (
+          <Modal title="Stats" onClose={() => setActivePanel(null)}>
+            <StatsPanel
+              quotaProgress={state.quotaProgress}
+              quotaRequired={state.quotaRequired}
+              week={state.week}
+              dayOfWeek={state.dayOfWeek}
+              stamina={state.stamina}
+              maxStamina={state.maxStamina}
+            />
+          </Modal>
+        )}
+        {activePanel === 'journal' && <JournalPanel onClose={() => setActivePanel(null)} />}
+        {activePanel === 'settings' && <SettingsPanel onClose={() => setActivePanel(null)} />}
 
         {/* TODO: machine-to-machine connection puzzles for synergy bonuses —
             select two owned machines, open CircuitEditor with the synergy's
             puzzleId, call gameState.addConnection() on solve */}
 
-        {/* game over state is handled inside each component for now, TODO: proper screen */}
-        <TurnControls day={state.day} week={state.week} dayOfWeek={state.dayOfWeek} onEndTurn={handleEndTurn} disabled={state.isGameOver} />
-      </main>
+        {solvingPuzzle && (
+          <div className="circuit-editor-overlay">
+            <CircuitEditor
+              puzzle={solvingPuzzle}
+              isRepair={isRepair}
+              gameState={state}
+              setGameState={setState}
+              onSolved={handleSolved}
+              onCancel={() => setSolvingInstanceId(null)}
+            />
+          </div>
+        )}
+
+        <DaySummary summary={state.lastDaySummary} />
+      </div>
 
       <PlayerSprite quotaProgress={state.quotaProgress} quotaRequired={state.quotaRequired} />
     </div>
