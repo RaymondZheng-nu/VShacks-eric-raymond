@@ -4,6 +4,7 @@ export const MAX_STAMINA = 3
 export const STARTING_CREDITS = 50
 export const DAYS_PER_WEEK = 6
 export const QUOTA_CHECK_DAY = 6
+export const DEBT_CUTOFF = 100
 export const DAY_NAMES = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
 
 // returns fresh state for a new run
@@ -15,6 +16,7 @@ export function createInitialState() {
     quotaRequired: 10,
     quotaProgress: 0,
     credits: STARTING_CREDITS,
+    debt: 0,
     stamina: MAX_STAMINA,
     maxStamina: MAX_STAMINA,
     ownedMachines: [],

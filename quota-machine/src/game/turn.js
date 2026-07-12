@@ -1,7 +1,7 @@
 import { resolveScore } from '../engine/scoring-engine'
 import { MACHINES } from '../data/machines'
 import { FEATURED_SYNERGIES } from '../data/synergies'
-import { DAYS_PER_WEEK, QUOTA_CHECK_DAY, DAY_NAMES } from './gameState'
+import { DAYS_PER_WEEK, QUOTA_CHECK_DAY, DAY_NAMES, DEBT_CUTOFF } from './gameState'
 import { generateDailyTasks } from './tasks'
 import { generateShopOffers } from './shop'
 
@@ -40,11 +40,12 @@ export function advanceTurn(state, rng = Math.random) {
   const dailyCredits = ownedMachines.filter((m) => m.online).length
 
   let quotaProgress = state.quotaProgress + score.total
-  let { quotaRequired, credits, week, isGameOver } = state
+  let { quotaRequired, credits, week, isGameOver, debt } = state
   credits += dailyCredits
   let dayOfWeek = state.dayOfWeek
   let quotaPassed = null
   let creditsEarned = 0
+  let debtIncurred = 0
   let shopOffers = state.shopOffers
 
   if (isQuotaDay) {
@@ -58,8 +59,16 @@ export function advanceTurn(state, rng = Math.random) {
       dayOfWeek = 1
       shopOffers = generateShopOffers(rng)
     } else {
-      isGameOver = true
-      dayOfWeek += 1
+      // shortfall becomes debt and is deducted from credits so the revenue bar goes red
+      debtIncurred = quotaRequired - quotaProgress
+      debt += debtIncurred
+      credits -= debtIncurred
+      quotaProgress = Math.max(0, quotaProgress - quotaRequired)
+      quotaRequired = Math.ceil(quotaRequired * 1.15) // 15% ramp per week, TODO: tune this
+      week += 1
+      dayOfWeek = 1
+      shopOffers = generateShopOffers(rng)
+      isGameOver = debt > DEBT_CUTOFF
     }
   } else {
     dayOfWeek += 1
@@ -79,6 +88,7 @@ export function advanceTurn(state, rng = Math.random) {
     isQuotaDay,
     quotaPassed: isQuotaDay ? quotaPassed : null,
     creditsEarned,
+    debtIncurred,
   }
 
   const nextState = {
@@ -89,6 +99,7 @@ export function advanceTurn(state, rng = Math.random) {
     quotaRequired,
     quotaProgress,
     credits,
+    debt,
     ownedMachines,
     isGameOver,
     lastDaySummary,

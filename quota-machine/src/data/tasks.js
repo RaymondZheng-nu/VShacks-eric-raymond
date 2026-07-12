@@ -6,6 +6,7 @@ export const TASK_TYPES = [
     baseOutput: 2,
     staminaCost: 1,
     automationMachineId: 'conveyor',
+    puzzleId: 'and-basic',
   },
   {
     id: 'stamp',
@@ -14,6 +15,7 @@ export const TASK_TYPES = [
     baseOutput: 3,
     staminaCost: 1,
     automationMachineId: 'stamper',
+    puzzleId: 'or-basic',
   },
   {
     id: 'invert',
@@ -22,6 +24,7 @@ export const TASK_TYPES = [
     baseOutput: 2,
     staminaCost: 1,
     automationMachineId: 'inverter-rig',
+    puzzleId: 'not-basic',
   },
   {
     id: 'calibrate',
@@ -30,6 +33,7 @@ export const TASK_TYPES = [
     baseOutput: 3,
     staminaCost: 1,
     automationMachineId: 'sorter',
+    puzzleId: 'xor-basic',
   },
   {
     id: 'weld',
@@ -38,6 +42,7 @@ export const TASK_TYPES = [
     baseOutput: 4,
     staminaCost: 1,
     automationMachineId: 'welder',
+    puzzleId: 'nand-basic',
   },
   {
     id: 'package',
@@ -46,6 +51,7 @@ export const TASK_TYPES = [
     baseOutput: 4,
     staminaCost: 1,
     automationMachineId: 'packager',
+    puzzleId: 'nor-basic',
   },
   // { id: 'debug', name: 'Debug Console', description: 'Check error logs.', baseOutput: 1, staminaCost: 1, automationMachineId: null },
   // removed too punishing

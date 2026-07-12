@@ -1,10 +1,13 @@
 import { getMachineById } from '../data/machines'
 
-// lists every owned machine offline ones can be installed or repaired
-export default function MachineYard({ ownedMachines, onSolve }) {
+// lists every owned machine and offline ones can be installed or repaired with onSolve
+export default function MachineYard({ ownedMachines, onSolve, onEnterConnectMode }) {
   return (
     <section className="machine-yard">
       <h2>Machines</h2>
+      <button className="machine-yard-connect-btn" onClick={onEnterConnectMode}>
+        Connect Machines
+      </button>
       {ownedMachines.length === 0 ? (
         <p>No machines yet — visit the shop.</p>
       ) : (

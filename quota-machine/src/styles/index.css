@@ -379,6 +379,12 @@ html, body {
   font-size: 0.95rem;
 }
 
+.hud-stamina-info {
+  margin: 0;
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.8);
+}
+
 .revenue-bar {
   position: absolute;
   top: 16px;
@@ -469,6 +475,42 @@ html, body {
 
 .shelf-machine--online img {
   filter: none;
+}
+
+.shelf-machine--selected {
+  outline: 2px solid #2dd4bf;
+  outline-offset: 3px;
+  border-radius: 6px;
+  box-shadow: 0 0 8px rgba(45, 212, 191, 0.8);
+}
+
+.connection-lines {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.connection-line {
+  stroke: #2dd4bf;
+  stroke-width: 2px;
+  filter: drop-shadow(0 0 3px rgba(45, 212, 191, 0.8));
+}
+
+.connect-banner {
+  position: absolute;
+  top: 80px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  background: rgba(20, 20, 25, 0.85);
+  border: 1px solid rgba(45, 212, 191, 0.5);
+  border-radius: 8px;
+  padding: 0.5rem 1rem;
+  font-size: 0.9rem;
 }
 
 .modal-backdrop {
