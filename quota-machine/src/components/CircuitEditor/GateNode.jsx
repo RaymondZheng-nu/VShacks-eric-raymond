@@ -1,4 +1,4 @@
-const BASE = '/quota-machine/sprites/circuits'
+const BASE = `${import.meta.env.BASE_URL}sprites/circuits`
 
 const GATE_SPRITE = {
   AND:    `${BASE}/AND.png`,

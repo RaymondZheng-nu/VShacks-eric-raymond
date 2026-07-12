@@ -2,19 +2,19 @@
 export const MACHINES = [
   {
     id: 'conveyor',
-    name: 'Conveyor Feeder',
+    name: 'Signal Processor',
     cost: 10,
     chips: 2,
     multBonus: 0,
     baseOutput: 2,
     rarity: 'common',
-    artKey: 'conveyor',
+    artKey: 'conveyor', // artKey wasn't updated when we renamed — sprites still use old keys
     puzzleId: 'and-basic',
     repairPuzzleId: 'nand-chain',
   },
   {
     id: 'stamper',
-    name: 'Hydraulic Stamper',
+    name: 'Requirements DB',
     cost: 15,
     chips: 4,
     multBonus: 0,
@@ -26,10 +26,10 @@ export const MACHINES = [
   },
   {
     id: 'inverter-rig',
-    name: 'Inverter Rig',
+    name: 'Interface Controller',
     cost: 12,
     baseOutput: 0,
-    chips: 0,
+    chips: 0, // pure mult machine, no chips — only one like this
     multBonus: 2,
     rarity: 'uncommon',
     artKey: 'inverter-rig',
@@ -38,7 +38,7 @@ export const MACHINES = [
   },
   {
     id: 'sorter',
-    name: 'Optical Sorter',
+    name: 'Test Harness',
     cost: 20,
     chips: 6,
     multBonus: 0,
@@ -50,7 +50,7 @@ export const MACHINES = [
   },
   {
     id: 'welder',
-    name: 'Robotic Welder',
+    name: 'Trade Analyzer',
     cost: 25,
     chips: 4,
     multBonus: 2,
@@ -62,7 +62,7 @@ export const MACHINES = [
   },
   {
     id: 'packager',
-    name: 'Auto Packager',
+    name: 'Verification Suite',
     cost: 30, // same as welder intentional
     chips: 8,
     multBonus: 0,
@@ -74,7 +74,7 @@ export const MACHINES = [
   },
 ]
 
-// find machine by id returns undefined if missing
+// just Array.find, nothing exciting
 export function getMachineById(id) {
   return MACHINES.find((m) => m.id === id)
 }

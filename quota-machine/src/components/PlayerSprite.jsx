@@ -3,9 +3,9 @@ const SPRITE_BASE = `${import.meta.env.BASE_URL}sprites/player`
 // returns sprite path based on quota completion
 function getSpriteForQuota(quotaProgress, quotaRequired) {
   const pct = quotaRequired > 0 ? quotaProgress / quotaRequired : 0
-  if (pct >= 0.66) return `${SPRITE_BASE}/player_happy.png`
-  if (pct >= 0.33) return `${SPRITE_BASE}/player_neutral.png`
-  return `${SPRITE_BASE}/player_sad.png`
+  if (pct >= 0.66) return `${SPRITE_BASE}/player-happy.png`
+  if (pct >= 0.33) return `${SPRITE_BASE}/player-neutral.png`
+  return `${SPRITE_BASE}/player-sad.png`
 }
 
 // fixed bottom left player sprite reacts to quota progress

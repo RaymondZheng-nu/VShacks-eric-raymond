@@ -9,7 +9,6 @@ import { getPuzzleById } from './data/puzzles'
 import { findSynergy } from './data/synergies'
 import TaskList from './components/TaskList.jsx'
 import DaySummary from './components/DaySummary.jsx'
-import PlayerSprite from './components/PlayerSprite.jsx'
 import Taskbar from './components/Taskbar.jsx'
 import RevenueBar from './components/RevenueBar.jsx'
 import MachineShelf from './components/MachineShelf.jsx'
@@ -332,8 +331,6 @@ export default function App() {
 
         <DaySummary summary={state.lastDaySummary} />
       </div>
-
-      <PlayerSprite quotaProgress={state.quotaProgress} quotaRequired={state.quotaRequired} />
 
       {state.isGameOver && <GameOver state={state} onRestart={handleRestart} />}
     </div>

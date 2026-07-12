@@ -22,9 +22,9 @@ export default function Taskbar({ activePanel, onSelectPanel, onEndTurn, endTurn
             className={`taskbar-slot${activePanel === slot.key ? ' taskbar-slot--active' : ''}`}
             onClick={isEndTurn ? onEndTurn : () => onSelectPanel(slot.key)}
             disabled={isEndTurn && endTurnDisabled}
-            title={isEndTurn ? endTurnLabel : slot.label}
           >
             <img src={`${UI_BASE}/${slot.icon}`} alt={slot.label} />
+            <span className="taskbar-slot-label">{isEndTurn ? endTurnLabel : slot.label}</span>
           </button>
         )
       })}

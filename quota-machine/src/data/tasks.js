@@ -1,8 +1,8 @@
 export const TASK_TYPES = [
   {
     id: 'wiring',
-    name: 'Fix Wiring',
-    description: 'Trace the fault and reconnect the cable run.',
+    name: 'Resolve ICD Conflict',
+    description: 'Two subsystem teams disagree on the signal format at their interface. Get them to sign off on a common definition.',
     baseOutput: 2,
     staminaCost: 1,
     automationMachineId: 'conveyor',
@@ -10,8 +10,8 @@ export const TASK_TYPES = [
   },
   {
     id: 'stamp',
-    name: 'Stamp Parts',
-    description: 'Run the hydraulic press for the parts order.',
+    name: 'Update RTM',
+    description: 'Three new requirements came in from the customer. Trace each one to its design element in the traceability matrix.',
     baseOutput: 3,
     staminaCost: 1,
     automationMachineId: 'stamper',
@@ -19,8 +19,8 @@ export const TASK_TYPES = [
   },
   {
     id: 'invert',
-    name: 'Invert Signal',
-    description: 'Flip the polarity on the signal chain.',
+    name: 'Flag Signal Discrepancy',
+    description: 'Power team is asserting an active-low line that propulsion is treating as active-high. classic interface assumption mismatch. write it up.',
     baseOutput: 2,
     staminaCost: 1,
     automationMachineId: 'inverter-rig',
@@ -28,8 +28,8 @@ export const TASK_TYPES = [
   },
   {
     id: 'calibrate',
-    name: 'Calibrate Sensors',
-    description: 'Align the optical sensors to spec.',
+    name: 'Run Integration Test',
+    description: 'First time the comms board and the flight computer are talking to each other. Log any timing violations.',
     baseOutput: 3,
     staminaCost: 1,
     automationMachineId: 'sorter',
@@ -37,17 +37,17 @@ export const TASK_TYPES = [
   },
   {
     id: 'weld',
-    name: 'Weld Joint',
-    description: 'Seal the pressure joint on the line.',
+    name: 'Conduct Trade Study',
+    description: 'Two competing antenna designs. Score them against mass, cost, and link margin. Pick one and document why.',
     baseOutput: 4,
-    staminaCost: 1,
+    staminaCost: 1, // considered making trade studies cost 2 stamina but didn't get to it
     automationMachineId: 'welder',
     puzzleId: 'nand-basic',
   },
   {
     id: 'package',
-    name: 'Package Goods',
-    description: 'Box and label the outgoing shipment.',
+    name: 'Write V&V Procedure',
+    description: 'Document the exact test steps that will formally verify the proximity sensor shall-statement in the spec.',
     baseOutput: 4,
     staminaCost: 1,
     automationMachineId: 'packager',
@@ -57,8 +57,8 @@ export const TASK_TYPES = [
   // removed too punishing
   {
     id: 'inspect',
-    name: 'Quality Inspect',
-    description: 'Check products against the quality checklist.',
+    name: 'Check Spec Compliance',
+    description: 'walk the cable routing against the EMI shielding spec. boring but you catch it now or you catch it at acceptance test.',
     baseOutput: 2,
     staminaCost: 1,
     automationMachineId: null, // no machine for this one yet
@@ -66,6 +66,7 @@ export const TASK_TYPES = [
   },
 ]
 
+// TODO: add a task for sitting in on PDR/CDR reviews? feels very SE but maybe too niche
 // returns undefined if not found
 export function getTaskTypeById(id) {
   return TASK_TYPES.find((t) => t.id === id)
