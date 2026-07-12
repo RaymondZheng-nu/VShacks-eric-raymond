@@ -13,7 +13,7 @@ function slotPositionFor(instanceId, ownedMachines) {
 }
 
 // auto-places owned machines on fixed shelf slots in purchase order — no drag/placement
-// TODO: swap SHELF_SPRITE for a per-machine sprite (owned.machineId / artKey) once that art exists
+// all 6 machines have real on/off art now, generic sprite is just a safety fallback
 export default function MachineShelf({ ownedMachines, onSolve, connectingMode, selectedMachineA, onConnectClick, connections }) {
   const prevOnlineRef = useRef({}) // instanceId -> online, so we can spot offline->online transitions
   const [justOnline, setJustOnline] = useState(new Set())
@@ -74,15 +74,18 @@ export default function MachineShelf({ ownedMachines, onSolve, connectingMode, s
         // failed = was online, broke down and needs repair; offline+no threshold = never installed yet
         const isFailed = !owned.online && owned.failureThreshold != null
         const justCameOnline = justOnline.has(owned.instanceId)
+        // pick on/off art per machine, this reads owned.online fresh every render so it just tracks state
+        const hasCustomSprite = Boolean(machine?.spriteOn && machine?.spriteOff)
+        const sprite = owned.online ? (machine?.spriteOn ?? SHELF_SPRITE) : (machine?.spriteOff ?? SHELF_SPRITE)
         return (
           <button
             key={owned.instanceId}
-            className={`shelf-machine${owned.online ? ' shelf-machine--online' : ''}${isSelected ? ' shelf-machine--selected' : ''}${isFailed ? ' shelf-machine--failed' : ''}${justCameOnline ? ' shelf-machine--just-online' : ''}`}
+            className={`shelf-machine${owned.online ? ' shelf-machine--online' : ''}${isSelected ? ' shelf-machine--selected' : ''}${isFailed ? ' shelf-machine--failed' : ''}${justCameOnline ? ' shelf-machine--just-online' : ''}${hasCustomSprite ? ' shelf-machine--custom-sprite' : ''}`}
             style={{ left: slot.x, top: slot.y }}
             onClick={() => handleClick(owned)}
             title={machine?.name ?? owned.machineId}
           >
-            <img src={SHELF_SPRITE} alt={machine?.name ?? owned.machineId} />
+            <img src={sprite} alt={machine?.name ?? owned.machineId} />
             {isFailed && <span className="shelf-machine-tint" />}
             {isFailed && <span className="shelf-machine-warning">!</span>}
           </button>

@@ -11,6 +11,9 @@ export const MACHINES = [
     artKey: 'conveyor', // artKey wasn't updated when we renamed — sprites still use old keys
     puzzleId: 'and-basic',
     repairPuzzleId: 'nand-chain',
+    // real on/off art, added late so double check these paths if the shelf ever moves
+    spriteOn: `${import.meta.env.BASE_URL}sprites/machines/signal_processor_machine.png`,
+    spriteOff: `${import.meta.env.BASE_URL}sprites/machines/signal_processor_machine_off.png`,
   },
   {
     id: 'stamper',
@@ -23,6 +26,8 @@ export const MACHINES = [
     artKey: 'stamper',
     puzzleId: 'or-basic',
     repairPuzzleId: 'and-or-combo',
+    spriteOn: `${import.meta.env.BASE_URL}sprites/machines/RequirementsDB_machine.png`,
+    spriteOff: `${import.meta.env.BASE_URL}sprites/machines/RequirementsDB_machine_off.png`,
   },
   {
     id: 'inverter-rig',
@@ -35,6 +40,8 @@ export const MACHINES = [
     artKey: 'inverter-rig',
     puzzleId: 'not-basic',
     repairPuzzleId: 'half-adder',
+    spriteOn: `${import.meta.env.BASE_URL}sprites/machines/interface_controller_machine.png`,
+    spriteOff: `${import.meta.env.BASE_URL}sprites/machines/interface_controller_machine_off.png`,
   },
   {
     id: 'sorter',
@@ -47,6 +54,8 @@ export const MACHINES = [
     artKey: 'sorter',
     puzzleId: 'xor-basic',
     repairPuzzleId: 'half-adder',
+    spriteOn: `${import.meta.env.BASE_URL}sprites/machines/test_harness_machine.png`,
+    spriteOff: `${import.meta.env.BASE_URL}sprites/machines/test_harness_machine_off.png`,
   },
   {
     id: 'welder',
@@ -59,6 +68,8 @@ export const MACHINES = [
     artKey: 'welder',
     puzzleId: 'nand-basic',
     repairPuzzleId: 'and-or-combo',
+    spriteOn: `${import.meta.env.BASE_URL}sprites/machines/trade_analyzer_machine.png`,
+    spriteOff: `${import.meta.env.BASE_URL}sprites/machines/trade_analyzer_machine_off.png`,
   },
   {
     id: 'packager',
@@ -71,6 +82,8 @@ export const MACHINES = [
     artKey: 'packager',
     puzzleId: 'nor-basic',
     repairPuzzleId: 'nand-chain',
+    spriteOn: `${import.meta.env.BASE_URL}sprites/machines/verification_suite_machine.png`,
+    spriteOff: `${import.meta.env.BASE_URL}sprites/machines/verification_suite_machine_off.png`,
   },
 ]
 

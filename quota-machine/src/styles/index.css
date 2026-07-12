@@ -535,16 +535,15 @@ html, body {
   filter: none;
 }
 
+/* real on/off art already looks right both ways, dont grayscale it on top */
+.shelf-machine--custom-sprite img {
+  filter: none;
+}
+
 .shelf-machine--selected {
   outline: 2px solid #2dd4bf;
   outline-offset: 3px;
   border-radius: 6px;
-  box-shadow: 0 0 8px rgba(45, 212, 191, 0.8);
-}
-
-.shelf-machine--failed {
-  border-radius: 6px;
-  animation: shelf-failed-pulse 1.6s ease-in-out infinite;
 }
 
 .shelf-machine-tint {
@@ -571,11 +570,6 @@ html, body {
   font-weight: bold;
   text-align: center;
   pointer-events: none;
-}
-
-@keyframes shelf-failed-pulse {
-  0%, 100% { box-shadow: 0 0 4px 2px rgba(220, 38, 38, 0.4); }
-  50% { box-shadow: 0 0 10px 5px rgba(220, 38, 38, 0.85); }
 }
 
 .shelf-machine--just-online img {
@@ -747,7 +741,7 @@ html, body {
   font-weight: bold;
   letter-spacing: 0.15em;
   color: #f2f2f2;
-  text-shadow: 0 0 8px rgba(45, 212, 191, 0.9), 0 0 24px rgba(45, 212, 191, 0.5), 0 2px 0 rgba(0, 0, 0, 0.8);
+  text-shadow: 0 2px 0 rgba(0, 0, 0, 0.8);
 }
 
 .start-subtitle {
@@ -767,7 +761,7 @@ html, body {
   letter-spacing: 0.08em;
   color: #f2f2f2;
   cursor: pointer;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08), inset 0 -2px 0 rgba(0, 0, 0, 0.5), 0 0 10px rgba(45, 212, 191, 0.3);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08), inset 0 -2px 0 rgba(0, 0, 0, 0.5);
 }
 
 .start-button:hover {
