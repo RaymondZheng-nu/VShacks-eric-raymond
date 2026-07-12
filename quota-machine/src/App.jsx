@@ -18,7 +18,7 @@ import MachineYard from './components/MachineYard.jsx'
 import StatsPanel from './components/StatsPanel.jsx'
 import JournalPanel from './components/JournalPanel.jsx'
 import SettingsPanel from './components/SettingsPanel.jsx'
-import CircuitEditor from './components/CircuitEditor/CircuitEditor.jsx'
+import PuzzleBoard from './components/PuzzleBoard.jsx'
 import GameOver from './components/GameOver.jsx'
 import FloatingTextLayer from './components/FloatingTextLayer.jsx'
 import StartScreen from './components/StartScreen.jsx'
@@ -314,7 +314,7 @@ export default function App() {
 
         {solvingPuzzle && (
           <div className="circuit-editor-overlay">
-            <CircuitEditor
+            <PuzzleBoard
               puzzle={solvingPuzzle}
               isRepair={machinePuzzle != null && isRepair}
               gameState={state}
