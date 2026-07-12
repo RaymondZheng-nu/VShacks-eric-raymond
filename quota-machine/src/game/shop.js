@@ -4,6 +4,7 @@ import { nextInstanceId } from './gameState'
 export const INSUFFICIENT_CREDITS = 'INSUFFICIENT_CREDITS'
 export const UNKNOWN_MACHINE = 'UNKNOWN_MACHINE'
 export const REROLL_COST = 5
+export const MAX_MACHINE_LEVEL = 3
 
 // returns scaled cost based on week
 export function scaledCost(machine, week) {
@@ -40,6 +41,7 @@ export function buyMachine(state, machineId) {
     online: false,
     turnsSinceSolved: 0,
     failureThreshold: null,
+    level: 1,
   }
 
   // todo should we prevent buying duplicates
@@ -50,5 +52,32 @@ export function buyMachine(state, machineId) {
       ownedMachines: [...state.ownedMachines, newMach],
     },
     error: null,
+  }
+}
+
+// cost to go from currentLevel to currentLevel + 1
+export function upgradeCost(machine, currentLevel) {
+  return Math.ceil(machine.cost * 1.5 * currentLevel)
+}
+
+// levels up an owned machine; returns state unchanged if maxed or too expensive
+export function upgradeMachine(state, instanceId) {
+  const owned = state.ownedMachines.find((m) => m.instanceId === instanceId)
+  if (!owned) return state
+  const machine = getMachineById(owned.machineId)
+  if (!machine) return state
+
+  const level = owned.level ?? 1
+  if (level >= MAX_MACHINE_LEVEL) return state
+
+  const cost = upgradeCost(machine, level)
+  if (state.credits < cost) return state
+
+  return {
+    ...state,
+    credits: state.credits - cost,
+    ownedMachines: state.ownedMachines.map((m) =>
+      m.instanceId === instanceId ? { ...m, level: level + 1 } : m
+    ),
   }
 }

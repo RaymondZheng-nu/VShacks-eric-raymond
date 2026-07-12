@@ -41,6 +41,7 @@ export function resolveTaskManually(state, taskId) {
       ...state,
       stamina: state.stamina - 1,
       tasks: state.tasks.map((t) => t.id === taskId ? { ...t, done: true } : t),
+      totalTasksCompleted: (state.totalTasksCompleted ?? 0) + 1,
     },
   }
 }

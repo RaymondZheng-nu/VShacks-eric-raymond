@@ -10,14 +10,17 @@ export function resolveScore({ ownedMachines, connections = [], tasks = [], part
     if (!owned.online) continue
     const part = partCatalog.find((p) => p.id === owned.machineId)
     if (!part) continue
+    const level = owned.level ?? 1 // upgrades scale a machine's own output, not synergy math
 
     if (part.chips > 0) {
-      chips += part.chips
-      contributions.push({ source: part.name, instanceId: owned.instanceId, type: 'chips', value: part.chips })
+      const chipsValue = part.chips * level
+      chips += chipsValue
+      contributions.push({ source: part.name, instanceId: owned.instanceId, type: 'chips', value: chipsValue })
     }
     if (part.multBonus > 0) {
-      mult += part.multBonus
-      contributions.push({ source: part.name, instanceId: owned.instanceId, type: '+mult', value: part.multBonus })
+      const multValue = part.multBonus * level
+      mult += multValue
+      contributions.push({ source: part.name, instanceId: owned.instanceId, type: '+mult', value: multValue })
     }
   }
 

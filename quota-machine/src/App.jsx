@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { createInitialState, bringMachineOnline, addConnection, QUOTA_CHECK_DAY, DAY_NAMES } from './game/gameState'
 import { advanceTurn } from './game/turn'
 import { generateDailyTasks } from './game/tasks'
-import { generateShopOffers, rerollShop } from './game/shop'
+import { generateShopOffers, rerollShop, upgradeMachine } from './game/shop'
 import { getMachineById } from './data/machines'
 import { getTaskTypeById } from './data/tasks'
 import { getPuzzleById } from './data/puzzles'
@@ -20,6 +20,7 @@ import StatsPanel from './components/StatsPanel.jsx'
 import JournalPanel from './components/JournalPanel.jsx'
 import SettingsPanel from './components/SettingsPanel.jsx'
 import CircuitEditor from './components/CircuitEditor/CircuitEditor.jsx'
+import GameOver from './components/GameOver.jsx'
 
 const BACKGROUND = '/quota-machine/sprites/backdrop/Warehousebackdrop.png'
 const DEFAULT_CONNECTION_PUZZLE_ID = 'and-basic'
@@ -68,8 +69,27 @@ export default function App() {
     setState((prev) => ({
       ...prev,
       tasks: prev.tasks.map((t) => (t.id === solvingTaskId ? { ...t, done: true } : t)),
+      totalTasksCompleted: (prev.totalTasksCompleted ?? 0) + 1,
     }))
     setSolvingTaskId(null)
+  }
+
+  // spends credits to level up an owned machine
+  function handleUpgradeMachine(instanceId) {
+    setState((prev) => upgradeMachine(prev, instanceId))
+  }
+
+  // resets to a fresh run and clears any open modal/puzzle/connect-mode state
+  function handleRestart() {
+    const s = createInitialState()
+    setState({ ...s, tasks: generateDailyTasks(s), shopOffers: generateShopOffers() })
+    setSolvingInstanceId(null)
+    setSolvingTaskId(null)
+    setActivePanel(null)
+    setConnectingMode(false)
+    setSelectedMachineA(null)
+    setConnectingPuzzlePair(null)
+    setConnectMessage(null)
   }
 
   // toggles connection mode; closes any open modal so the shelf is clickable
@@ -218,6 +238,8 @@ export default function App() {
               ownedMachines={state.ownedMachines}
               onSolve={setSolvingInstanceId}
               onEnterConnectMode={handleToggleConnectMode}
+              credits={state.credits}
+              onUpgrade={handleUpgradeMachine}
             />
           </Modal>
         )}
@@ -230,6 +252,10 @@ export default function App() {
               dayOfWeek={state.dayOfWeek}
               stamina={state.stamina}
               maxStamina={state.maxStamina}
+              credits={state.credits}
+              debt={state.debt}
+              ownedMachines={state.ownedMachines}
+              connections={state.connections}
             />
           </Modal>
         )}
@@ -257,6 +283,8 @@ export default function App() {
       </div>
 
       <PlayerSprite quotaProgress={state.quotaProgress} quotaRequired={state.quotaRequired} />
+
+      {state.isGameOver && <GameOver state={state} onRestart={handleRestart} />}
     </div>
   )
 }

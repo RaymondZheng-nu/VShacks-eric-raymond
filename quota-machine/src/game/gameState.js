@@ -1,10 +1,10 @@
 import { rollFailureThreshold } from './turn'
 
-export const MAX_STAMINA = 3
-export const STARTING_CREDITS = 50
+export const MAX_STAMINA = 4
+export const STARTING_CREDITS = 25
 export const DAYS_PER_WEEK = 6
 export const QUOTA_CHECK_DAY = 6
-export const DEBT_CUTOFF = 100
+export const DEBT_CUTOFF = 50
 export const DAY_NAMES = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
 
 // returns fresh state for a new run
@@ -17,6 +17,7 @@ export function createInitialState() {
     quotaProgress: 0,
     credits: STARTING_CREDITS,
     debt: 0,
+    totalTasksCompleted: 0,
     stamina: MAX_STAMINA,
     maxStamina: MAX_STAMINA,
     ownedMachines: [],

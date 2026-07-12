@@ -62,6 +62,7 @@ export const TASK_TYPES = [
     baseOutput: 2,
     staminaCost: 1,
     automationMachineId: null, // no machine for this one yet
+    puzzleId: 'buffer-basic',
   },
 ]
 

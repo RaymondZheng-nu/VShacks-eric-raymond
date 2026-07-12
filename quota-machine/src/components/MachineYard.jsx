@@ -1,7 +1,8 @@
 import { getMachineById } from '../data/machines'
+import { upgradeCost, MAX_MACHINE_LEVEL } from '../game/shop'
 
-// lists every owned machine and offline ones can be installed or repaired with onSolve
-export default function MachineYard({ ownedMachines, onSolve, onEnterConnectMode }) {
+// lists every owned machine and offline ones can be installed or repaired
+export default function MachineYard({ ownedMachines, onSolve, onEnterConnectMode, credits, onUpgrade }) {
   return (
     <section className="machine-yard">
       <h2>Machines</h2>
@@ -20,9 +21,13 @@ export default function MachineYard({ ownedMachines, onSolve, onEnterConnectMode
             const stability = owned.online && owned.failureThreshold != null
               ? Math.max(0, owned.failureThreshold - owned.turnsSinceSolved)
               : null
+            const level = owned.level ?? 1
+            const maxed = level >= MAX_MACHINE_LEVEL
+            const cost = maxed ? null : upgradeCost(machine, level)
             return (
               <li key={owned.instanceId} className="machine-yard-item">
                 <span>{machine?.name ?? owned.machineId}</span>
+                <span className="machine-yard-level">Lv.{level}</span>
                 <span className={owned.online ? 'status-online' : 'status-offline'}>
                   {owned.online ? 'Online' : 'Offline'}
                 </span>
@@ -33,6 +38,9 @@ export default function MachineYard({ ownedMachines, onSolve, onEnterConnectMode
                 {!owned.online && (
                   <button onClick={() => onSolve(owned.instanceId)}>{isRepair ? 'Repair' : 'Install'}</button>
                 )}
+                <button onClick={() => onUpgrade(owned.instanceId)} disabled={maxed || credits < cost}>
+                  {maxed ? 'MAX' : `Upgrade (${cost} credits)`}
+                </button>
               </li>
             )
           })}
