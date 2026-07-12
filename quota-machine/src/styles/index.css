@@ -386,8 +386,8 @@ html, body {
   max-width: 280px;
   max-height: 70vh;
   overflow: auto;
-  background: rgba(20, 20, 25, 0.75);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(15, 18, 22, 0.92);
+  border: 1px solid rgba(45, 212, 191, 0.25);
   border-radius: 8px;
   padding: 0.75rem 1rem;
 }
@@ -491,9 +491,9 @@ html, body {
 
 .shelf-machine {
   position: absolute;
-  transform: translate(-50%, -50%);
-  width: 56px;
-  height: 56px;
+  transform: translate(-50%, -100%);
+  width: 4vw;
+  height: 4vw;
   padding: 0;
   background: none;
   border: none;

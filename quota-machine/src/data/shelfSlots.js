@@ -1,10 +1,11 @@
-// centers of 6 back wall shelves, measured against the backdrop at 1280x800.
-// shifted right of the old values so slot 0 clears the tasks panel (was hidden behind it)
+// bottom-center anchor points on the back wall shelf plank, measured against the
+// backdrop at a 1280x800 render (see MachineShelf.jsx for the translate(-50%,-100%) anchor).
+// x spread avoids the tasks panel on the left and the desk on the right; y sits on the top plank.
 export const SHELF_SLOTS = [
-  { x: '33.6%', y: '28%' },
-  { x: '41.4%', y: '28%' },
-  { x: '49.2%', y: '28%' },
-  { x: '57%', y: '28%' },
-  { x: '64.8%', y: '28%' },
-  { x: '72.7%', y: '28%' },
+  { x: '29.3%', y: '23.2%' },
+  { x: '38.8%', y: '23.2%' },
+  { x: '48.4%', y: '23.2%' },
+  { x: '57.9%', y: '23.2%' },
+  { x: '67.4%', y: '23.2%' },
+  { x: '77%', y: '23.2%' },
 ]
