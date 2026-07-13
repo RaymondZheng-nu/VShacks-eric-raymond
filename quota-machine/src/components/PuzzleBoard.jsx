@@ -1,6 +1,7 @@
 import { useState, useMemo } from 'react'
 import { evaluateCircuit } from '../engine/circuit-engine'
 import { spendStamina } from '../game/turn'
+import CircuitComplete from './CircuitComplete.jsx'
 
 const BASE = `${import.meta.env.BASE_URL}sprites/circuits`
 const GATE_SPRITE = {
@@ -159,7 +160,7 @@ function wirePath(a, b) {
   return `M ${a.x} ${a.y} C ${mx} ${a.y}, ${mx} ${b.y}, ${b.x} ${b.y}`
 }
 
-export default function PuzzleBoard({ puzzle, isRepair, gameState, setGameState, onSolved, onCancel }) {
+export default function PuzzleBoard({ puzzle, isRepair, gameState, setGameState, onSolved, onCancel, onDismiss, completeLabel, completeResult }) {
   const [circuit] = useState(() => {
     const { nodes, inputIds } = generateRandomCircuit()
     const targetRow = computeTruthTableAndPickTarget(nodes, inputIds)
@@ -168,6 +169,8 @@ export default function PuzzleBoard({ puzzle, isRepair, gameState, setGameState,
   })
 
   const [inputValues, setInputValues] = useState(circuit.startVals)
+  // stays true once confirmed so the completion screen sticks around over the finished board
+  const [solved, setSolved] = useState(false)
 
   const outputs = useMemo(() => {
     try { return evaluateCircuit(circuit.nodes, inputValues) }
@@ -186,6 +189,7 @@ export default function PuzzleBoard({ puzzle, isRepair, gameState, setGameState,
     const spend = spendStamina(gameState)
     if (!spend.ok) return
     setGameState(spend.state)
+    setSolved(true)
     onSolved()
   }
 
@@ -289,6 +293,10 @@ export default function PuzzleBoard({ puzzle, isRepair, gameState, setGameState,
           Confirm (1 stamina)
         </button>
       </div>
+
+      {solved && (
+        <CircuitComplete label={completeLabel} result={completeResult} onDismiss={onDismiss} />
+      )}
     </div>
   )
 }

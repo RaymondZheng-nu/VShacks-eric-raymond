@@ -44,6 +44,8 @@ export default function App() {
   const prevStaminaRef = useRef(state.stamina)
   const [staminaFlash, setStaminaFlash] = useState(false)
   const [gameStarted, setGameStarted] = useState(false)
+  // snapshot so install vs repair text and puzzle dont flip once bringMachineOnline sets a threshold
+  const solvingIsRepairRef = useRef(false)
 
   // auto-clears transient connect-mode messages ("Machine must be online", "Already connected")
   useEffect(() => {
@@ -85,12 +87,18 @@ export default function App() {
     setState(next)
   }
 
-  // brings solved machine online
+  // opens the install or repair puzzle for a machine, snapshots repair status before it can change
+  function handleOpenMachinePuzzle(instanceId) {
+    const m = state.ownedMachines.find((om) => om.instanceId === instanceId)
+    solvingIsRepairRef.current = m != null && m.failureThreshold != null
+    setSolvingInstanceId(instanceId)
+  }
+
+  // brings solved machine online, modal stays open so the completion screen can show first
   function handleSolved() {
     // console.log('machine online:', solvingInstanceId)
     setState((prev) => bringMachineOnline(prev, solvingInstanceId))
     pushFloatingText('-1 stamina', 15, 22, 'blue')
-    setSolvingInstanceId(null)
   }
 
   // name is wrong, this opens the puzzle modal not a manual resolve — TODO rename
@@ -98,7 +106,8 @@ export default function App() {
     setSolvingTaskId(taskId)
   }
 
-  // puzzle solved: CircuitEditor already spent the stamina, so just mark the task done and close
+  // puzzle solved: puzzle board already spent the stamina, so just mark the task done
+  // modal stays open so the completion screen can show first, dismiss closes it after
   function handleTaskSolved() {
     const task = state.tasks.find((t) => t.id === solvingTaskId)
     setState((prev) => ({
@@ -108,7 +117,6 @@ export default function App() {
     }))
     if (task) pushFloatingText(`+${task.output} chips`, 15, 30, 'green')
     pushFloatingText('-1 stamina', 15, 22, 'blue')
-    setSolvingTaskId(null)
   }
 
   // spends credits to level up an owned machine, and shows the cost spent
@@ -167,13 +175,11 @@ export default function App() {
     setConnectingPuzzlePair({ aId: selectedMachineA, bId: owned.instanceId })
   }
 
-  // puzzle solved: CircuitEditor already spent the stamina, so just register the connection and close
+  // puzzle solved: puzzle board already spent the stamina, so just register the connection
+  // modal stays open so the completion screen can show first, dismiss closes it after
   function handleConnectionSolved() {
     setState((prev) => addConnection(prev, connectingPuzzlePair.aId, connectingPuzzlePair.bId))
     pushFloatingText('-1 stamina', 15, 22, 'blue')
-    setConnectingPuzzlePair(null)
-    setConnectingMode(false)
-    setSelectedMachineA(null)
   }
 
   // cancels the connection puzzle: close modal, exit connection mode, no state changes
@@ -201,8 +207,9 @@ export default function App() {
   }
 
   const solvingMachine = state.ownedMachines.find((m) => m.instanceId === solvingInstanceId) // might be undefined if stale
-  // use harder repair puzzle if machine has failed before
-  const isRepair = solvingMachine != null && solvingMachine.failureThreshold != null
+  // use harder repair puzzle if machine had already failed before this puzzle was opened
+  // snapshotted in the ref so it cant flip mid solve once bringMachineOnline sets a threshold
+  const isRepair = solvingIsRepairRef.current
   const machinePuzzle = solvingMachine
     ? getPuzzleById(
         isRepair
@@ -231,6 +238,30 @@ export default function App() {
 
   const solvingPuzzle = machinePuzzle ?? taskPuzzle ?? connectionPuzzle
 
+  // label and reward text for the completion screen, whichever of the three flows is active
+  let completeLabel = ''
+  let completeResult = 'No reward'
+  if (machinePuzzle) {
+    const machineName = getMachineById(solvingMachine.machineId)?.name ?? 'Machine'
+    completeLabel = isRepair ? 'Machine repaired' : `${machineName} online`
+  } else if (taskPuzzle) {
+    completeLabel = solvingTask?.name ?? 'Task complete'
+    completeResult = solvingTask ? `+${solvingTask.output} chips` : 'No reward'
+  } else if (connectingPuzzlePair) {
+    completeLabel = 'Connection established'
+  }
+
+  // actually closes the puzzle board once the completion screen is dismissed, mirrors onCancel below
+  function handleCircuitCompleteDismiss() {
+    if (machinePuzzle) setSolvingInstanceId(null)
+    else if (taskPuzzle) setSolvingTaskId(null)
+    else {
+      setConnectingPuzzlePair(null)
+      setConnectingMode(false)
+      setSelectedMachineA(null)
+    }
+  }
+
   return (
     <div className="app">
       <div className="game-canvas" style={{ backgroundImage: `url(${BACKGROUND})` }}>
@@ -238,7 +269,7 @@ export default function App() {
         <RevenueBar credits={state.credits} />
         <MachineShelf
           ownedMachines={state.ownedMachines}
-          onSolve={setSolvingInstanceId}
+          onSolve={handleOpenMachinePuzzle}
           connectingMode={connectingMode}
           selectedMachineA={selectedMachineA}
           onConnectClick={handleConnectClick}
@@ -286,7 +317,7 @@ export default function App() {
           <Modal title="Machines" onClose={() => setActivePanel(null)}>
             <MachineYard
               ownedMachines={state.ownedMachines}
-              onSolve={setSolvingInstanceId}
+              onSolve={handleOpenMachinePuzzle}
               onEnterConnectMode={handleToggleConnectMode}
               credits={state.credits}
               onUpgrade={handleUpgradeMachine}
@@ -325,6 +356,9 @@ export default function App() {
                 else if (taskPuzzle) setSolvingTaskId(null)
                 else handleConnectionCancel()
               }}
+              onDismiss={handleCircuitCompleteDismiss}
+              completeLabel={completeLabel}
+              completeResult={completeResult}
             />
           </div>
         )}
