@@ -1,7 +1,7 @@
 import { rollFailureThreshold } from './turn'
 
 export const MAX_STAMINA = 4
-export const STARTING_CREDITS = 25
+export const STARTING_CREDITS = 40
 export const DAYS_PER_WEEK = 6
 export const QUOTA_CHECK_DAY = 6
 export const DEBT_CUTOFF = 50

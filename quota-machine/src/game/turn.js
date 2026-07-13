@@ -7,7 +7,7 @@ import { generateShopOffers } from './shop'
 
 const FAILURE_MIN_TURNS = 4
 const FAILURE_MAX_TURNS = 6 // maybe increase this later, feels punishing
-const CREDITS_PER_QUOTA_PASS = 20
+const CREDITS_PER_QUOTA_PASS = 35
 
 // returns random turns before a machine can fail
 export function rollFailureThreshold(rng = Math.random) {
@@ -37,7 +37,7 @@ export function advanceTurn(state, rng = Math.random) {
     synergyCatalog: FEATURED_SYNERGIES,
   })
 
-  const dailyCredits = ownedMachines.filter((m) => m.online).length // one credit per online machine, name is a bit misleading
+  const dailyCredits = ownedMachines.filter((m) => m.online).length * 3 // 3 credits per online machine per day
 
   let quotaProgress = state.quotaProgress + score.total
   let { quotaRequired, credits, week, isGameOver, debt } = state
@@ -54,7 +54,7 @@ export function advanceTurn(state, rng = Math.random) {
       creditsEarned = CREDITS_PER_QUOTA_PASS
       credits += CREDITS_PER_QUOTA_PASS
       quotaProgress = Math.max(0, quotaProgress - quotaRequired)
-      quotaRequired = Math.ceil(quotaRequired * 1.15) // 15 percent ramp per week todo tune this
+      quotaRequired = Math.ceil(quotaRequired * 1.4) // 15 percent ramp per week todo tune this
       week += 1
       dayOfWeek = 1
       shopOffers = generateShopOffers(rng)
@@ -64,7 +64,7 @@ export function advanceTurn(state, rng = Math.random) {
       debt += debtIncurred
       credits -= debtIncurred
       quotaProgress = Math.max(0, quotaProgress - quotaRequired)
-      quotaRequired = Math.ceil(quotaRequired * 1.15) // 15% ramp per week, TODO: tune this
+      quotaRequired = Math.ceil(quotaRequired * 1.4) // 15% ramp per week, TODO: tune this
       week += 1
       dayOfWeek = 1
       shopOffers = generateShopOffers(rng)
