@@ -1,6 +1,5 @@
 import { useState, useMemo } from 'react'
 import { evaluateCircuit } from '../engine/circuit-engine'
-import { PUZZLE_CIRCUITS } from '../data/puzzleCircuits'
 import { spendStamina } from '../game/turn'
 
 const BASE = `${import.meta.env.BASE_URL}sprites/circuits`
@@ -14,14 +13,92 @@ const GATE_SPRITE = {
   BUFFER: `${BASE}/resistor.png`,
 }
 
+const INPUT_LABELS = ['a','b','c','d','e','f','g','h']
+const TWO_INPUT_GATES = ['AND','OR','XOR','NAND','NOR']
+const ONE_INPUT_GATES = ['NOT','BUFFER']
+const ALL_GATES = [...TWO_INPUT_GATES, ...ONE_INPUT_GATES]
+
 const VW = 500
+
+function generateRandomCircuit() {
+  const numInputs = 2 + Math.floor(Math.random() * 7) // 2-8
+  const inputIds = INPUT_LABELS.slice(0, numInputs)
+  const nodes = inputIds.map(id => ({ id, type: 'INPUT', inputs: [] }))
+
+  let available = [...inputIds]
+  const numLayers = 2 + Math.floor(Math.random() * 2) // 2-3 layers
+  let gateIdx = 0
+
+  for (let layer = 0; layer < numLayers; layer++) {
+    const isLastLayer = layer === numLayers - 1
+    const numGates = isLastLayer ? 1 : 1 + Math.floor(Math.random() * 2) // last layer always 1 gate
+    const layerOutputs = []
+
+    for (let g = 0; g < numGates; g++) {
+      const gateType = ALL_GATES[Math.floor(Math.random() * ALL_GATES.length)]
+      const id = `g${gateIdx++}`
+      const isSingle = ONE_INPUT_GATES.includes(gateType)
+
+      let inputs
+      if (isSingle) {
+        const src = available[Math.floor(Math.random() * available.length)]
+        inputs = [src]
+      } else {
+        // pick 2 from available, allowing same source if only 1 available
+        const src1 = available[Math.floor(Math.random() * available.length)]
+        let src2 = available[Math.floor(Math.random() * available.length)]
+        inputs = [src1, src2]
+      }
+
+      nodes.push({ id, type: gateType, inputs })
+      layerOutputs.push(id)
+    }
+
+    available = layerOutputs
+  }
+
+  // the last gate's output feeds the OUTPUT node
+  const lastGate = available[available.length - 1]
+  nodes.push({ id: 'out', type: 'OUTPUT', inputs: [lastGate] })
+
+  return { nodes, inputIds }
+}
+
+function computeTruthTableAndPickTarget(nodes, inputIds) {
+  const rows = []
+  const total = 1 << inputIds.length
+  for (let mask = 0; mask < total; mask++) {
+    const vals = {}
+    inputIds.forEach((id, i) => { vals[id] = Boolean((mask >> (inputIds.length - 1 - i)) & 1) })
+    try {
+      const outs = evaluateCircuit(nodes, vals)
+      rows.push({ inputValues: vals, expected: { out: outs['out'] } })
+    } catch {}
+  }
+  if (!rows.length) return null
+  return rows[Math.floor(Math.random() * rows.length)]
+}
+
+function pickStartingState(inputIds, nodes, targetRow) {
+  for (let attempt = 0; attempt < 30; attempt++) {
+    const vals = {}
+    inputIds.forEach(id => { vals[id] = Math.random() > 0.5 })
+    try {
+      const outs = evaluateCircuit(nodes, vals)
+      if (outs['out'] !== targetRow.expected['out']) return vals
+    } catch {}
+  }
+  // fallback: flip first input from target
+  const vals = { ...targetRow.inputValues }
+  vals[inputIds[0]] = !vals[inputIds[0]]
+  return vals
+}
 
 function layoutNodes(nodes) {
   const inputNodes  = nodes.filter(n => n.type === 'INPUT')
   const outputNodes = nodes.filter(n => n.type === 'OUTPUT')
   const gateNodes   = nodes.filter(n => n.type !== 'INPUT' && n.type !== 'OUTPUT')
 
-  // topological layer for every node
   const nodeMap = new Map(nodes.map(n => [n.id, n]))
   const layerOf = {}
   function getLayer(id) {
@@ -34,7 +111,6 @@ function layoutNodes(nodes) {
   }
   nodes.forEach(n => getLayer(n.id))
 
-  // group gates by layer
   const byLayer = {}
   gateNodes.forEach(n => {
     const l = layerOf[n.id]
@@ -49,16 +125,10 @@ function layoutNodes(nodes) {
 
   const pos = {}
 
-  // inputs: evenly spread on left
   inputNodes.forEach((n, i) => {
     pos[n.id] = { x: 65, y: VH / (inputNodes.length + 1) * (i + 1) }
   })
 
-  // gates: resolve in topological order, spread each layer evenly by sorted idealY
-  const ordered = [...gateNodes].sort((a, b) => layerOf[a.id] - layerOf[b.id])
-  const xGate = (l) => 65 + (l / (maxGateLayer + 1)) * (VW - 130)
-
-  // process each layer: compute ideal Y per gate, sort, then assign evenly-spaced Y
   Object.entries(byLayer)
     .sort((a, b) => parseInt(a[0]) - parseInt(b[0]))
     .forEach(([l, gates]) => {
@@ -70,11 +140,10 @@ function layoutNodes(nodes) {
 
       const count = withIdeal.length
       withIdeal.forEach(({ n }, i) => {
-        pos[n.id] = { x: xGate(parseInt(l)), y: VH / (count + 1) * (i + 1) }
+        pos[n.id] = { x: 65 + (parseInt(l) / (maxGateLayer + 1)) * (VW - 130), y: VH / (count + 1) * (i + 1) }
       })
     })
 
-  // outputs: Y = source gate's Y
   outputNodes.forEach((n, i) => {
     const srcY = n.inputs.length && pos[n.inputs[0]] != null
       ? pos[n.inputs[0]].y
@@ -90,47 +159,23 @@ function wirePath(a, b) {
   return `M ${a.x} ${a.y} C ${mx} ${a.y}, ${mx} ${b.y}, ${b.x} ${b.y}`
 }
 
-// pick a target row and a starting input state that doesn't already match
-function pickInit(puzzle, staticNodes) {
-  const rows = puzzle.spec.rows
-  const targetRow = rows[Math.floor(Math.random() * rows.length)]
-
-  let inputValues = null
-  if (staticNodes) {
-    for (let attempt = 0; attempt < 30; attempt++) {
-      const vals = Object.fromEntries(
-        puzzle.spec.inputIds.map(id => [id, Math.random() > 0.5])
-      )
-      try {
-        const outs = evaluateCircuit(staticNodes, vals)
-        const matches = puzzle.spec.outputIds.every(id => outs[id] === targetRow.expected[id])
-        if (!matches) { inputValues = vals; break }
-      } catch {}
-    }
-  }
-
-  // fallback: all-false (safe default that usually doesn't match target for non-trivial gates)
-  if (!inputValues) {
-    inputValues = Object.fromEntries(puzzle.spec.inputIds.map(id => [id, false]))
-  }
-
-  return { targetRow, inputValues }
-}
-
 export default function PuzzleBoard({ puzzle, isRepair, gameState, setGameState, onSolved, onCancel }) {
-  const staticNodes = PUZZLE_CIRCUITS[puzzle.id]
+  const [circuit] = useState(() => {
+    const { nodes, inputIds } = generateRandomCircuit()
+    const targetRow = computeTruthTableAndPickTarget(nodes, inputIds)
+    const startVals = targetRow ? pickStartingState(inputIds, nodes, targetRow) : Object.fromEntries(inputIds.map(id => [id, false]))
+    return { nodes, inputIds, targetRow, startVals }
+  })
 
-  const [{ targetRow, inputValues: initVals }] = useState(() => pickInit(puzzle, staticNodes))
-  const [inputValues, setInputValues] = useState(initVals)
+  const [inputValues, setInputValues] = useState(circuit.startVals)
 
   const outputs = useMemo(() => {
-    if (!staticNodes) return null
-    try { return evaluateCircuit(staticNodes, inputValues) }
+    try { return evaluateCircuit(circuit.nodes, inputValues) }
     catch { return null }
-  }, [staticNodes, inputValues])
+  }, [circuit.nodes, inputValues])
 
-  const isCorrect = outputs != null &&
-    puzzle.spec.outputIds.every(id => outputs[id] === targetRow.expected[id])
+  const isCorrect = outputs != null && circuit.targetRow != null &&
+    outputs['out'] === circuit.targetRow.expected['out']
 
   function toggleInput(id) {
     setInputValues(prev => ({ ...prev, [id]: !prev[id] }))
@@ -144,22 +189,12 @@ export default function PuzzleBoard({ puzzle, isRepair, gameState, setGameState,
     onSolved()
   }
 
-  if (!staticNodes) {
-    return (
-      <div className="pboard">
-        <p style={{ color: '#f87171' }}>No circuit defined for: {puzzle.id}</p>
-        <button onClick={onCancel}>Cancel</button>
-      </div>
-    )
-  }
+  const { pos, VH } = layoutNodes(circuit.nodes)
+  const gateNodes = circuit.nodes.filter(n => n.type !== 'INPUT' && n.type !== 'OUTPUT')
 
-  const { pos, VH } = layoutNodes(staticNodes)
-  const gateNodes = staticNodes.filter(n => n.type !== 'INPUT' && n.type !== 'OUTPUT')
-
-  // build wire list, deduplicating same-source-same-target pairs
   const seen = new Set()
   const wires = []
-  staticNodes.forEach(node => {
+  circuit.nodes.forEach(node => {
     if (node.type === 'INPUT') return
     ;(node.inputs || []).forEach(srcId => {
       const key = `${srcId}=>${node.id}`
@@ -182,11 +217,9 @@ export default function PuzzleBoard({ puzzle, isRepair, gameState, setGameState,
       <div className="pboard-target">
         <span className="pboard-target-label">Target output</span>
         <div className="pboard-target-vals">
-          {puzzle.spec.outputIds.map(id => (
-            <span key={id} className={`pboard-target-val pboard-target-val--${targetRow.expected[id] ? 'on' : 'off'}`}>
-              {id} = {targetRow.expected[id] ? 'ON' : 'OFF'}
-            </span>
-          ))}
+          <span className={`pboard-target-val pboard-target-val--${circuit.targetRow?.expected['out'] ? 'on' : 'off'}`}>
+            OUT = {circuit.targetRow?.expected['out'] ? 'ON' : 'OFF'}
+          </span>
         </div>
       </div>
 
@@ -196,7 +229,7 @@ export default function PuzzleBoard({ puzzle, isRepair, gameState, setGameState,
             {wires.map(w => <path key={w.key} d={w.d} className="pboard-wire" />)}
           </svg>
 
-          {puzzle.spec.inputIds.map(id => {
+          {circuit.inputIds.map(id => {
             const p = pos[id]
             const on = inputValues[id]
             return (
@@ -224,22 +257,21 @@ export default function PuzzleBoard({ puzzle, isRepair, gameState, setGameState,
             )
           })}
 
-          {puzzle.spec.outputIds.map(id => {
-            const p = pos[id]
-            const on = outputs?.[id]
-            const matchesTarget = on === targetRow.expected[id]
+          {(() => {
+            const p = pos['out']
+            const on = outputs?.['out']
+            const matchesTarget = on === circuit.targetRow?.expected['out']
             return (
               <div
-                key={id}
                 className={`pboard-node pboard-output${on ? ' pboard-output--on' : ''}${matchesTarget ? ' pboard-output--match' : ''}`}
                 style={{ left: `${(p.x / VW) * 100}%`, top: `${(p.y / VH) * 100}%` }}
               >
-                <img src={`${BASE}/DC.png`} alt={id} className="pboard-sprite pboard-output-sprite" style={{ opacity: on ? 1 : 0.2 }} />
-                <span className="pboard-node-id">{id}</span>
+                <img src={`${BASE}/DC.png`} alt="out" className="pboard-sprite pboard-output-sprite" style={{ opacity: on ? 1 : 0.2 }} />
+                <span className="pboard-node-id">OUT</span>
                 <span className={`pboard-node-val ${on ? 'on' : 'off'}`}>{on ? '1' : '0'}</span>
               </div>
             )
-          })}
+          })()}
         </div>
       </div>
 
