@@ -6,12 +6,13 @@ import { generateDailyTasks } from './tasks'
 import { generateShopOffers } from './shop'
 
 const DAILY_EVENTS = [
-  { id: 'power-surge',  name: 'Power Surge',      desc: 'All machines aged 2 extra turns.' },
-  { id: 'overtime',     name: 'Overtime',          desc: '+2 stamina today.' },
-  { id: 'bulk-deal',    name: 'Bulk Deal',         desc: 'Shop costs halved today.' },
-  { id: 'efficiency',   name: 'Efficiency Drive',  desc: 'Tasks give double output today.' },
+  { id: 'power-surge', name: 'Power Surge', desc: 'All machines aged 2 extra turns.' },
+  { id: 'overtime', name: 'Overtime', desc: '+2 stamina today.' },
+  { id: 'bulk-deal', name: 'Bulk Deal', desc: 'Shop costs halved today.' },
+  // TODO: power surge maybe should only hit 1 random machine instead of all of them
+  { id: 'efficiency', name: 'Efficiency Drive', desc: 'Tasks give double output today.' },
 ]
-const EVENT_CHANCE = 0.3
+const EVENT_CHANCE = 0.3 // was 0.25, bumped it up — felt too rare
 
 const FAILURE_MIN_TURNS = 4
 const FAILURE_MAX_TURNS = 6 // maybe increase this later, feels punishing
@@ -25,16 +26,16 @@ export function rollFailureThreshold(rng = Math.random) {
 
 // does everything for end of turn probably too much
 export function advanceTurn(state, rng = Math.random) {
-  const isQuotaDay = state.dayOfWeek === QUOTA_CHECK_DAY // saturday
+  const isQuotaDay = state.dayOfWeek === QUOTA_CHECK_DAY // was saturday back when weeks existed
 
   const currentEvent = rng() < EVENT_CHANCE ? DAILY_EVENTS[Math.floor(rng() * DAILY_EVENTS.length)] : null
 
   const ownedMachines = state.ownedMachines.map((m) => ({ ...m }))
 
-  const surgeDmg = currentEvent?.id === 'power-surge' ? 2 : 0
+  const extraWear = currentEvent?.id === 'power-surge' ? 2 : 0
   for (const m of ownedMachines) {
     if (!m.online) continue
-    m.turnsSinceSolved += 1 + surgeDmg
+    m.turnsSinceSolved += 1 + extraWear
     if (m.failureThreshold != null && m.turnsSinceSolved >= m.failureThreshold) {
       m.online = false
     }

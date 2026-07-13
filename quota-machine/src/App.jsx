@@ -170,7 +170,7 @@ export default function App() {
     setState(next)
   }
 
-  // resets to a fresh run — wish we had a reducer for all this clearing
+  // resets to a fresh run, this would be 2 lines with a reducer but here we are
   function handleRestart() {
     clearSave()
     const s = createInitialState()

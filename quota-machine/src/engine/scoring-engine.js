@@ -6,13 +6,14 @@ export function resolveScore({ ownedMachines, connections = [], tasks = [], part
   let mult = 1
   const contributions = []
 
-  // pre-count online instances per machine type for count-scaling machines
-  const onlineCountByType = {}
+  // need a pre-pass to count how many of each scaling machine are online
+  // yes i know i could do this in one loop, it gets messy
+  const countByType = {}
   for (const owned of ownedMachines) {
     if (!owned.online) continue
     const part = partCatalog.find((p) => p.id === owned.machineId)
     if (!part?.countScaling) continue
-    onlineCountByType[owned.machineId] = (onlineCountByType[owned.machineId] ?? 0) + 1
+    countByType[owned.machineId] = (countByType[owned.machineId] ?? 0) + 1
   }
 
   for (const owned of ownedMachines) {
@@ -20,8 +21,7 @@ export function resolveScore({ ownedMachines, connections = [], tasks = [], part
     const part = partCatalog.find((p) => p.id === owned.machineId)
     if (!part) continue
     const level = owned.level ?? 1 // upgrades scale a machine's own output, not synergy math
-    // count-scaling machines multiply output by how many of that type are online
-    const count = part.countScaling ? (onlineCountByType[owned.machineId] ?? 1) : 1
+    const count = part.countScaling ? (countByType[owned.machineId] ?? 1) : 1
 
     if (part.chips > 0) {
       const chipsValue = part.chips * level * count

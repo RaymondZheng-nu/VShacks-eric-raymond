@@ -94,10 +94,10 @@ export const MACHINES = [
     baseOutput: 3,
     rarity: 'uncommon',
     artKey: 'stack-processor',
-    // chips output multiplies by how many Stack Processors are online at once
-    countScaling: true,
+    countScaling: true, // chips output multiplies by how many are online
     puzzleId: 'buffer-basic',
     repairPuzzleId: 'and-or-combo',
+    // TODO: get actual sprites for these two
     spriteOn: `${import.meta.env.BASE_URL}sprites/machines/generic.png`,
     spriteOff: `${import.meta.env.BASE_URL}sprites/machines/generic.png`,
   },
@@ -110,13 +110,14 @@ export const MACHINES = [
     baseOutput: 0,
     rarity: 'rare',
     artKey: 'cascade-engine',
-    // mult bonus multiplies by how many Cascade Engines are online at once
-    countScaling: true,
+    countScaling: true, // same deal but for mult
     puzzleId: 'nand-chain',
     repairPuzzleId: 'half-adder',
     spriteOn: `${import.meta.env.BASE_URL}sprites/machines/generic.png`,
     spriteOff: `${import.meta.env.BASE_URL}sprites/machines/generic.png`,
   },
+  // cut: load balancer machine (redistributes chips between machines)
+  // was going to be a debuff-negation type thing but ran out of time
 ]
 
 // just Array.find, nothing exciting

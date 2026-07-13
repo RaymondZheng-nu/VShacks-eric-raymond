@@ -22,17 +22,18 @@ const ALL_GATES = [...TWO_INPUT_GATES, ...ONE_INPUT_GATES]
 const VW = 500
 
 function generateRandomCircuit(day = 1) {
-  // difficulty scales every 5 days, capped at tier 3
-  const tier = Math.min(Math.floor((day - 1) / 5), 3)
-  const minInputs = 2 + tier
-  const inputRange = 2 + tier
+  // ramps up every 5 days — don't touch this, it took a while to feel right
+  const diff = Math.min(Math.floor((day - 1) / 5), 3)
+  // const numInputs = 2 + Math.floor(Math.random() * 7) // old version, too hard too fast
+  const minInputs = 2 + diff
+  const inputRange = 2 + diff
   const numInputs = Math.min(minInputs + Math.floor(Math.random() * (inputRange + 1)), 8)
   const inputIds = INPUT_LABELS.slice(0, numInputs)
   const nodes = inputIds.map(id => ({ id, type: 'INPUT', inputs: [] }))
 
   let available = [...inputIds]
-  const minLayers = tier >= 2 ? 3 : 2
-  const numLayers = minLayers + Math.floor(Math.random() * (tier >= 2 ? 2 : 1))
+  const minLayers = diff >= 2 ? 3 : 2
+  const numLayers = minLayers + Math.floor(Math.random() * (diff >= 2 ? 2 : 1))
   let gateIdx = 0
 
   for (let layer = 0; layer < numLayers; layer++) {
@@ -105,6 +106,7 @@ function pickStartingState(inputIds, nodes, targetRow) {
   return vals
 }
 
+// this layout function is a mess but it works, don't touch it
 function layoutNodes(nodes) {
   const inputNodes  = nodes.filter(n => n.type === 'INPUT')
   const outputNodes = nodes.filter(n => n.type === 'OUTPUT')

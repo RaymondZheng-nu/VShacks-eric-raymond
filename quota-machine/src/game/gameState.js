@@ -31,13 +31,12 @@ export function createInitialState() {
   }
 }
 
-let instanceCounter = 0 // global todo shove into state someday
-// returns unique string id with prefix
+let instanceCounter = 0 // global, TODO: shove into state someday
 export function nextInstanceId(prefix) {
   instanceCounter += 1
   return `${prefix}-${instanceCounter}`
 }
-// allows persist.js to restore the counter after loading a save
+// called on load to avoid id collisions with stuff already in the save
 export function setInstanceCounter(n) {
   instanceCounter = n
 }

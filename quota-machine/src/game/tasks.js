@@ -1,7 +1,7 @@
 import { TASK_TYPES } from '../data/tasks'
-import { MAX_STAMINA } from './gameState'
+import { MAX_STAMINA } from './gameState' // eslint-disable-line no-unused-vars
 
-// picks 3 to 5 random tasks marks automated if machine online
+// picks 3-5 tasks for the day, used to cap at 6 but felt like too many
 export function generateDailyTasks(state, rng = Math.random, event = null) {
   const count = 3 + Math.floor(rng() * 3)
 
