@@ -2,7 +2,7 @@ import { TASK_TYPES } from '../data/tasks'
 import { MAX_STAMINA } from './gameState'
 
 // picks 3 to 5 random tasks marks automated if machine online
-export function generateDailyTasks(state, rng = Math.random) {
+export function generateDailyTasks(state, rng = Math.random, event = null) {
   const count = 3 + Math.floor(rng() * 3)
 
   const shuffled = [...TASK_TYPES]
@@ -20,7 +20,7 @@ export function generateDailyTasks(state, rng = Math.random) {
     id: `task-${state.day}-${idx}`,
     typeId: type.id,
     name: type.name,
-    output: type.baseOutput,
+    output: event?.id === 'efficiency' ? type.baseOutput * 2 : type.baseOutput,
     staminaCost: type.staminaCost,
     done: false,
     automated: type.automationMachineId !== null && onlineMachineIds.includes(type.automationMachineId),

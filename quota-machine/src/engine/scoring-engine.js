@@ -6,19 +6,30 @@ export function resolveScore({ ownedMachines, connections = [], tasks = [], part
   let mult = 1
   const contributions = []
 
+  // pre-count online instances per machine type for count-scaling machines
+  const onlineCountByType = {}
+  for (const owned of ownedMachines) {
+    if (!owned.online) continue
+    const part = partCatalog.find((p) => p.id === owned.machineId)
+    if (!part?.countScaling) continue
+    onlineCountByType[owned.machineId] = (onlineCountByType[owned.machineId] ?? 0) + 1
+  }
+
   for (const owned of ownedMachines) {
     if (!owned.online) continue
     const part = partCatalog.find((p) => p.id === owned.machineId)
     if (!part) continue
     const level = owned.level ?? 1 // upgrades scale a machine's own output, not synergy math
+    // count-scaling machines multiply output by how many of that type are online
+    const count = part.countScaling ? (onlineCountByType[owned.machineId] ?? 1) : 1
 
     if (part.chips > 0) {
-      const chipsValue = part.chips * level
+      const chipsValue = part.chips * level * count
       chips += chipsValue
       contributions.push({ source: part.name, instanceId: owned.instanceId, type: 'chips', value: chipsValue })
     }
     if (part.multBonus > 0) {
-      const multValue = part.multBonus * level
+      const multValue = part.multBonus * level * count
       mult += multValue
       contributions.push({ source: part.name, instanceId: owned.instanceId, type: '+mult', value: multValue })
     }

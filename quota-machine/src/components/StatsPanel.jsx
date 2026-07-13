@@ -1,4 +1,3 @@
-import { DAY_NAMES } from '../game/gameState'
 import QuotaBar from './QuotaBar.jsx'
 import QuotaDeadline from './DebtCounter.jsx'
 import StaminaCounter from './StaminaCounter.jsx'
@@ -8,6 +7,7 @@ export default function StatsPanel({
   quotaRequired,
   week,
   dayOfWeek,
+  day,
   stamina,
   maxStamina,
   credits,
@@ -21,7 +21,7 @@ export default function StatsPanel({
   return (
     <>
       <section>
-        <h2>{DAY_NAMES[dayOfWeek - 1]}, Week {week}</h2>
+        <h2>Day {day}</h2>
         <p>Credits: {credits}</p>
         {debt > 0 && <p className="debt-counter-game-over">Debt: {debt}</p>}
       </section>

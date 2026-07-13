@@ -2,10 +2,10 @@ import { rollFailureThreshold } from './turn'
 
 export const MAX_STAMINA = 4
 export const STARTING_CREDITS = 40
-export const DAYS_PER_WEEK = 6
-export const QUOTA_CHECK_DAY = 6
+export const DAYS_PER_WEEK = 1
+export const QUOTA_CHECK_DAY = 1
 export const DEBT_CUTOFF = 50
-export const DAY_NAMES = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
+export const DAY_NAMES = ['Day']
 
 // returns fresh state for a new run
 export function createInitialState() {
@@ -13,7 +13,7 @@ export function createInitialState() {
     day: 1,
     week: 1,
     dayOfWeek: 1,
-    quotaRequired: 10,
+    quotaRequired: 2,
     quotaProgress: 0,
     credits: STARTING_CREDITS,
     debt: 0,
@@ -26,6 +26,8 @@ export function createInitialState() {
     shopOffers: [],
     lastDaySummary: null,
     isGameOver: false,
+    currentEvent: null,
+    shopDiscount: false,
   }
 }
 
@@ -34,6 +36,10 @@ let instanceCounter = 0 // global todo shove into state someday
 export function nextInstanceId(prefix) {
   instanceCounter += 1
   return `${prefix}-${instanceCounter}`
+}
+// allows persist.js to restore the counter after loading a save
+export function setInstanceCounter(n) {
+  instanceCounter = n
 }
 
 // marks machine online after solve

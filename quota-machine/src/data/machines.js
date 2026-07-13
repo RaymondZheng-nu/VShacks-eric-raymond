@@ -85,6 +85,38 @@ export const MACHINES = [
     spriteOn: `${import.meta.env.BASE_URL}sprites/machines/verification_suite_machine.png`,
     spriteOff: `${import.meta.env.BASE_URL}sprites/machines/verification_suite_machine_off.png`,
   },
+  {
+    id: 'stack-processor',
+    name: 'Stack Processor',
+    cost: 22,
+    chips: 3,
+    multBonus: 0,
+    baseOutput: 3,
+    rarity: 'uncommon',
+    artKey: 'stack-processor',
+    // chips output multiplies by how many Stack Processors are online at once
+    countScaling: true,
+    puzzleId: 'buffer-basic',
+    repairPuzzleId: 'and-or-combo',
+    spriteOn: `${import.meta.env.BASE_URL}sprites/machines/generic.png`,
+    spriteOff: `${import.meta.env.BASE_URL}sprites/machines/generic.png`,
+  },
+  {
+    id: 'cascade-engine',
+    name: 'Cascade Engine',
+    cost: 32,
+    chips: 0,
+    multBonus: 1,
+    baseOutput: 0,
+    rarity: 'rare',
+    artKey: 'cascade-engine',
+    // mult bonus multiplies by how many Cascade Engines are online at once
+    countScaling: true,
+    puzzleId: 'nand-chain',
+    repairPuzzleId: 'half-adder',
+    spriteOn: `${import.meta.env.BASE_URL}sprites/machines/generic.png`,
+    spriteOff: `${import.meta.env.BASE_URL}sprites/machines/generic.png`,
+  },
 ]
 
 // just Array.find, nothing exciting

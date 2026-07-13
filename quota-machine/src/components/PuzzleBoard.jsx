@@ -20,13 +20,18 @@ const ALL_GATES = [...TWO_INPUT_GATES, ...ONE_INPUT_GATES]
 
 const VW = 500
 
-function generateRandomCircuit() {
-  const numInputs = 2 + Math.floor(Math.random() * 7) // 2-8
+function generateRandomCircuit(day = 1) {
+  // difficulty scales every 5 days, capped at tier 3
+  const tier = Math.min(Math.floor((day - 1) / 5), 3)
+  const minInputs = 2 + tier
+  const inputRange = 2 + tier
+  const numInputs = Math.min(minInputs + Math.floor(Math.random() * (inputRange + 1)), 8)
   const inputIds = INPUT_LABELS.slice(0, numInputs)
   const nodes = inputIds.map(id => ({ id, type: 'INPUT', inputs: [] }))
 
   let available = [...inputIds]
-  const numLayers = 2 + Math.floor(Math.random() * 2) // 2-3 layers
+  const minLayers = tier >= 2 ? 3 : 2
+  const numLayers = minLayers + Math.floor(Math.random() * (tier >= 2 ? 2 : 1))
   let gateIdx = 0
 
   for (let layer = 0; layer < numLayers; layer++) {
@@ -76,19 +81,24 @@ function computeTruthTableAndPickTarget(nodes, inputIds) {
     } catch {}
   }
   if (!rows.length) return null
+  // prefer a target row where all-false starting state is NOT already correct
+  const allFalseVals = Object.fromEntries(inputIds.map(id => [id, false]))
+  try {
+    const allFalseOuts = evaluateCircuit(nodes, allFalseVals)
+    const nonTrivial = rows.filter(r => r.expected['out'] !== allFalseOuts['out'])
+    if (nonTrivial.length > 0) return nonTrivial[Math.floor(Math.random() * nonTrivial.length)]
+  } catch {}
   return rows[Math.floor(Math.random() * rows.length)]
 }
 
 function pickStartingState(inputIds, nodes, targetRow) {
-  for (let attempt = 0; attempt < 30; attempt++) {
-    const vals = {}
-    inputIds.forEach(id => { vals[id] = Math.random() > 0.5 })
-    try {
-      const outs = evaluateCircuit(nodes, vals)
-      if (outs['out'] !== targetRow.expected['out']) return vals
-    } catch {}
-  }
-  // fallback: flip first input from target
+  // always start all-off (all gray); computeTruthTableAndPickTarget already avoids trivially-solved targets
+  const allFalse = Object.fromEntries(inputIds.map(id => [id, false]))
+  try {
+    const outs = evaluateCircuit(nodes, allFalse)
+    if (outs['out'] !== targetRow.expected['out']) return allFalse
+  } catch {}
+  // fallback if all-false somehow already matches: flip first input
   const vals = { ...targetRow.inputValues }
   vals[inputIds[0]] = !vals[inputIds[0]]
   return vals
@@ -161,7 +171,7 @@ function wirePath(a, b) {
 
 export default function PuzzleBoard({ puzzle, isRepair, gameState, setGameState, onSolved, onCancel }) {
   const [circuit] = useState(() => {
-    const { nodes, inputIds } = generateRandomCircuit()
+    const { nodes, inputIds } = generateRandomCircuit(gameState?.day ?? 1)
     const targetRow = computeTruthTableAndPickTarget(nodes, inputIds)
     const startVals = targetRow ? pickStartingState(inputIds, nodes, targetRow) : Object.fromEntries(inputIds.map(id => [id, false]))
     return { nodes, inputIds, targetRow, startVals }

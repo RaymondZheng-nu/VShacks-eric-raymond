@@ -81,6 +81,7 @@ section h2,
   height: 100%;
   background: #4ade80;
   border-radius: 4px;
+  transition: width 0.4s ease;
 }
 
 .debt-counter-game-over {
@@ -680,6 +681,59 @@ section h2,
   100% { filter: brightness(1) saturate(1); }
 }
 
+.shelf-machine-tooltip {
+  display: none;
+  position: absolute;
+  bottom: calc(100% + 10px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(14, 16, 20, 0.96);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 6px;
+  padding: 0.45rem 0.65rem;
+  min-width: 140px;
+  text-align: left;
+  pointer-events: none;
+  z-index: 200;
+  white-space: nowrap;
+  font-size: 0.72rem;
+  line-height: 1.75;
+  color: rgba(255, 255, 255, 0.75);
+}
+
+.shelf-machine:hover .shelf-machine-tooltip {
+  display: block;
+}
+
+.shelf-machine-tooltip strong {
+  display: block;
+  color: #fff;
+  font-size: 0.78rem;
+  margin-bottom: 0.1rem;
+}
+
+.shelf-machine-tooltip span {
+  display: block;
+}
+
+.shelf-tooltip-level {
+  color: rgba(255, 255, 255, 0.4);
+  font-size: 0.68rem;
+  margin-bottom: 0.15rem;
+}
+
+.shelf-tooltip-chips { color: #60a5fa; }
+.shelf-tooltip-mult  { color: #f59e0b; }
+
+.shelf-tooltip-status {
+  margin-top: 0.2rem;
+  font-size: 0.68rem;
+}
+
+.shelf-tooltip-status--online  { color: #4ade80; }
+.shelf-tooltip-status--failed  { color: #f87171; }
+.shelf-tooltip-status--offline { color: rgba(255, 255, 255, 0.35); }
+
 .connection-lines {
   position: absolute;
   inset: 0;
@@ -1217,4 +1271,84 @@ section h2,
 .pboard-confirm-btn {
   flex: 1;
   font-weight: 600;
+}
+
+/* ── Machine health bar ─────────────────────────────────── */
+
+.shelf-machine-health {
+  position: absolute;
+  bottom: -5px;
+  left: 10%;
+  width: 80%;
+  height: 3px;
+  background: rgba(0,0,0,0.4);
+  border-radius: 2px;
+}
+.shelf-machine-health-fill {
+  height: 100%;
+  border-radius: 2px;
+  transition: width 0.3s, background 0.3s;
+}
+
+/* ── Shop owned count ───────────────────────────────────── */
+
+.shop-owned-count { color: #60a5fa; }
+
+/* ── Shop event banner ──────────────────────────────────── */
+
+.shop-event-banner {
+  font-size: 0.78rem;
+  color: #fbbf24;
+  background: rgba(251, 191, 36, 0.08);
+  border: 1px solid rgba(251, 191, 36, 0.3);
+  border-radius: 5px;
+  padding: 0.35rem 0.65rem;
+  margin-bottom: 0.5rem;
+}
+
+/* ── Quota fail flash ───────────────────────────────────── */
+
+.quota-fail-flash {
+  position: absolute;
+  inset: 0;
+  background: rgba(239, 68, 68, 0.3);
+  pointer-events: none;
+  z-index: 150;
+  animation: fail-flash-fade 0.7s ease-out forwards;
+}
+@keyframes fail-flash-fade {
+  0% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+/* ── HUD score preview ──────────────────────────────────── */
+
+.hud-score-preview {
+  font-size: 0.72rem;
+  color: rgba(255,255,255,0.5);
+  margin: 0.15rem 0 0;
+}
+.hud-score-preview strong {
+  color: #4ade80;
+}
+
+/* ── Day summary event ──────────────────────────────────── */
+
+.day-summary-event {
+  margin-top: 0.4rem;
+  font-size: 0.78rem;
+  color: #fbbf24;
+}
+
+/* ── Settings panel ─────────────────────────────────────── */
+
+.settings-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem 0;
+  font-size: 0.88rem;
+}
+.settings-toggle {
+  min-width: 48px;
 }

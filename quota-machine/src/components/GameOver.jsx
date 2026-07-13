@@ -2,12 +2,16 @@
 export default function GameOver({ state, onRestart }) {
   const machinesOnline = state.ownedMachines.filter((m) => m.online).length // same calc is in StatsPanel, should centralize
 
+  const best = parseInt(localStorage.getItem('quota-machine-best') ?? '0')
+  if (state.day > best) localStorage.setItem('quota-machine-best', String(state.day))
+
   return (
     <div className="game-over-overlay">
       <div className="game-over-panel">
         <h1 className="game-over-header">SHUTDOWN</h1>
         <ul className="game-over-stats">
-          <li><span>Weeks survived</span><span>{state.week}</span></li>
+          <li><span>Days survived</span><span>{state.day}</span></li>
+          <li><span>Best run</span><span>{Math.max(best, state.day)} days</span></li>
           <li><span>Final credits</span><span>{state.credits}</span></li>
           <li><span>Machines owned</span><span>{state.ownedMachines.length}</span></li>
           <li><span>Machines online</span><span>{machinesOnline}</span></li>

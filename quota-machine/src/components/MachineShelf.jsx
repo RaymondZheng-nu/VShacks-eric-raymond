@@ -77,17 +77,45 @@ export default function MachineShelf({ ownedMachines, onSolve, connectingMode, s
         // pick on/off art per machine, this reads owned.online fresh every render so it just tracks state
         const hasCustomSprite = Boolean(machine?.spriteOn && machine?.spriteOff)
         const sprite = owned.online ? (machine?.spriteOn ?? SHELF_SPRITE) : (machine?.spriteOff ?? SHELF_SPRITE)
+        const level = owned.level ?? 1
         return (
           <button
             key={owned.instanceId}
             className={`shelf-machine${owned.online ? ' shelf-machine--online' : ''}${isSelected ? ' shelf-machine--selected' : ''}${isFailed ? ' shelf-machine--failed' : ''}${justCameOnline ? ' shelf-machine--just-online' : ''}${hasCustomSprite ? ' shelf-machine--custom-sprite' : ''}`}
             style={{ left: slot.x, top: slot.y }}
             onClick={() => handleClick(owned)}
-            title={machine?.name ?? owned.machineId}
           >
             <img src={sprite} alt={machine?.name ?? owned.machineId} />
             {isFailed && <span className="shelf-machine-tint" />}
             {isFailed && <span className="shelf-machine-warning">!</span>}
+            {owned.online && owned.failureThreshold != null && (() => {
+              const healthPct = Math.max(0, (1 - owned.turnsSinceSolved / owned.failureThreshold) * 100)
+              const color = healthPct > 55 ? '#4ade80' : healthPct > 25 ? '#fbbf24' : '#f87171'
+              return (
+                <div className="shelf-machine-health">
+                  <div className="shelf-machine-health-fill" style={{ width: `${healthPct}%`, background: color }} />
+                </div>
+              )
+            })()}
+            {machine && (
+              <div className="shelf-machine-tooltip">
+                <strong>{machine.name}</strong>
+                <span className="shelf-tooltip-level">Lv. {level}</span>
+                {machine.chips > 0 && (
+                  <span className="shelf-tooltip-chips">
+                    +{machine.chips * level} chips{machine.countScaling ? ' ×online count' : ''}
+                  </span>
+                )}
+                {machine.multBonus > 0 && (
+                  <span className="shelf-tooltip-mult">
+                    +{machine.multBonus * level} mult{machine.countScaling ? ' ×online count' : ''}
+                  </span>
+                )}
+                <span className={`shelf-tooltip-status${owned.online ? ' shelf-tooltip-status--online' : isFailed ? ' shelf-tooltip-status--failed' : ' shelf-tooltip-status--offline'}`}>
+                  {owned.online ? 'online' : isFailed ? '⚠ needs repair' : 'offline — click to install'}
+                </span>
+              </div>
+            )}
           </button>
         )
       })}

@@ -4,7 +4,7 @@ export default function DaySummary({ summary }) {
 
   return (
     <section className="day-summary">
-      <h2>{summary.dayName}, Week {summary.week}</h2>
+      <h2>Day {summary.day}</h2>
       <ul className="day-summary-contributions">
         {(summary.contributions ?? []).map((c, i) => (
           <li key={i} className="day-summary-row">
@@ -34,6 +34,11 @@ export default function DaySummary({ summary }) {
       )}
       {summary.isQuotaDay && summary.quotaPassed === false && (
         <div className="day-summary-fail">quota failed. game over i guess</div>
+      )}
+      {summary.currentEvent && (
+        <div className="day-summary-event">
+          <strong>{summary.currentEvent.name}</strong> — {summary.currentEvent.desc}
+        </div>
       )}
     </section>
   )

@@ -7,8 +7,9 @@ export const REROLL_COST = 5
 export const MAX_MACHINE_LEVEL = 3
 
 // returns scaled cost based on week
-export function scaledCost(machine, week) {
-  return Math.ceil(machine.cost * (1 + 0.15 * (week - 1)))
+export function scaledCost(machine, week, discount = false) {
+  const base = Math.ceil(machine.cost * (1 + 0.15 * (week - 1)))
+  return discount ? Math.ceil(base * 0.5) : base
 }
 
 // picks 4 random machine ids for the shop
@@ -32,7 +33,7 @@ export function rerollShop(state, rng = Math.random) {
 export function buyMachine(state, machineId) {
   const machine = getMachineById(machineId)
   if (!machine) return { state, error: UNKNOWN_MACHINE }
-  const cost = scaledCost(machine, state.week ?? 1)
+  const cost = scaledCost(machine, state.week ?? 1, state.shopDiscount ?? false)
   if (state.credits < cost) return { state, error: INSUFFICIENT_CREDITS }
 
   const newMach = {

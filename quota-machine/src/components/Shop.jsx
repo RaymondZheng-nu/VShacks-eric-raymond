@@ -1,6 +1,7 @@
 import { MACHINES } from '../data/machines'
 import { TASK_TYPES } from '../data/tasks'
 import { buyMachine, scaledCost, REROLL_COST } from '../game/shop'
+import { playPurchase } from '../audio.js'
 
 // renders shop with offers tooltips and reroll
 export default function Shop({ credits, week, shopOffers, state, setState, onReroll, pushFloatingText }) {
@@ -12,6 +13,7 @@ export default function Shop({ credits, week, shopOffers, state, setState, onRer
       return
     }
     pushFloatingText(`-${state.credits - nextState.credits} credits`, 85, 12, 'red')
+    playPurchase()
     setState(nextState)
   }
 
@@ -19,12 +21,20 @@ export default function Shop({ credits, week, shopOffers, state, setState, onRer
     ? MACHINES.filter((m) => shopOffers.includes(m.id))
     : MACHINES
 
+  const ownedCounts = {}
+  ;(state.ownedMachines ?? []).forEach(m => {
+    ownedCounts[m.machineId] = (ownedCounts[m.machineId] ?? 0) + 1
+  })
+
+  const discount = state.shopDiscount ?? false
+
   return (
     <section className="shop">
       <h2>Shop ({credits} credits)</h2>
+      {discount && <div className="shop-event-banner">Bulk Deal: all prices halved today</div>}
       <ul className="shop-list">
         {machinesToShow.map((machine) => {
-          const cost = scaledCost(machine, week ?? 1)
+          const cost = scaledCost(machine, week ?? 1, discount)
           const automatesTask = TASK_TYPES.find((t) => t.automationMachineId === machine.id)
           // todo show rarity somewhere
           return (
@@ -41,7 +51,8 @@ export default function Shop({ credits, week, shopOffers, state, setState, onRer
                 {machine.multBonus > 0 && <div>+{machine.multBonus} mult</div>}
                 {/* this is kind of buried in the tooltip */}
                 {automatesTask && <div>automates: {automatesTask.name}</div>}
-                <div>puzzle needed: {machine.puzzleId}</div>
+                {ownedCounts[machine.id] > 0 && <div className="shop-owned-count">owned: {ownedCounts[machine.id]}</div>}
+                {machine.countScaling && <div>stacks with duplicates</div>}
               </div>
             </li>
           )

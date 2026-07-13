@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
-import { createInitialState, bringMachineOnline, addConnection, QUOTA_CHECK_DAY, DAY_NAMES } from './game/gameState'
+import { createInitialState, bringMachineOnline, addConnection } from './game/gameState'
 import { advanceTurn } from './game/turn'
 import { generateDailyTasks } from './game/tasks'
 import { generateShopOffers, rerollShop, upgradeMachine } from './game/shop'
@@ -7,6 +7,11 @@ import { getMachineById } from './data/machines'
 import { getTaskTypeById } from './data/tasks'
 import { getPuzzleById } from './data/puzzles'
 import { findSynergy } from './data/synergies'
+import { resolveScore } from './engine/scoring-engine'
+import { MACHINES } from './data/machines'
+import { FEATURED_SYNERGIES } from './data/synergies'
+import { saveGame, loadGame, clearSave, restoreInstanceCounter } from './game/persist'
+import { playInstall, playQuotaPass, playQuotaFail, playMachineFail, playTask } from './audio.js'
 import TaskList from './components/TaskList.jsx'
 import DaySummary from './components/DaySummary.jsx'
 import Taskbar from './components/Taskbar.jsx'
@@ -29,6 +34,22 @@ const DEFAULT_CONNECTION_PUZZLE_ID = 'and-basic'
 // root component owns game state and passes it to children
 export default function App() {
   const [state, setState] = useState(() => {
+    const saved = loadGame()
+    if (saved) {
+      restoreInstanceCounter(saved)
+      const patched = {
+        ...saved,
+        currentEvent: saved.currentEvent ?? null,
+        shopDiscount: saved.shopDiscount ?? false,
+      }
+      const needsTasks = !patched.tasks || patched.tasks.length === 0
+      const needsShop = !patched.shopOffers || patched.shopOffers.length === 0
+      return {
+        ...patched,
+        tasks: needsTasks ? generateDailyTasks(patched) : patched.tasks,
+        shopOffers: needsShop ? generateShopOffers() : patched.shopOffers,
+      }
+    }
     const s = createInitialState()
     return { ...s, tasks: generateDailyTasks(s), shopOffers: generateShopOffers() }
   })
@@ -44,6 +65,16 @@ export default function App() {
   const prevStaminaRef = useRef(state.stamina)
   const [staminaFlash, setStaminaFlash] = useState(false)
   const [gameStarted, setGameStarted] = useState(false)
+  const [failFlash, setFailFlash] = useState(false)
+
+  // save game state on every state change (except game over — clear save instead)
+  useEffect(() => {
+    if (state.isGameOver) {
+      clearSave()
+    } else {
+      saveGame(state)
+    }
+  }, [state])
 
   // auto-clears transient connect-mode messages ("Machine must be online", "Already connected")
   useEffect(() => {
@@ -78,10 +109,20 @@ export default function App() {
 
   // advances the game by one day, and shows machine income if any was earned
   function handleEndTurn() {
+    const prevOnline = new Set(state.ownedMachines.filter(m => m.online).map(m => m.instanceId))
     const next = advanceTurn(state)
     if (next.lastDaySummary?.dailyCredits > 0) {
       pushFloatingText(`+${next.lastDaySummary.dailyCredits}`, 85, 12, 'green')
     }
+    if (next.lastDaySummary?.quotaPassed === true) {
+      playQuotaPass()
+    } else if (next.lastDaySummary?.quotaPassed === false) {
+      playQuotaFail()
+      setFailFlash(true)
+      setTimeout(() => setFailFlash(false), 700)
+    }
+    const newlyFailed = next.ownedMachines.filter(m => !m.online && prevOnline.has(m.instanceId))
+    if (newlyFailed.length > 0) playMachineFail()
     setState(next)
   }
 
@@ -89,6 +130,7 @@ export default function App() {
   function handleSolved() {
     // console.log('machine online:', solvingInstanceId)
     setState((prev) => bringMachineOnline(prev, solvingInstanceId))
+    playInstall()
     pushFloatingText('-1 stamina', 15, 22, 'blue')
     setSolvingInstanceId(null)
   }
@@ -106,6 +148,7 @@ export default function App() {
       tasks: prev.tasks.map((t) => (t.id === solvingTaskId ? { ...t, done: true } : t)),
       totalTasksCompleted: (prev.totalTasksCompleted ?? 0) + 1,
     }))
+    playTask()
     if (task) pushFloatingText(`+${task.output} chips`, 15, 30, 'green')
     pushFloatingText('-1 stamina', 15, 22, 'blue')
     setSolvingTaskId(null)
@@ -121,6 +164,7 @@ export default function App() {
 
   // resets to a fresh run — wish we had a reducer for all this clearing
   function handleRestart() {
+    clearSave()
     const s = createInitialState()
     setState({ ...s, tasks: generateDailyTasks(s), shopOffers: generateShopOffers() })
     setSolvingInstanceId(null)
@@ -231,9 +275,18 @@ export default function App() {
 
   const solvingPuzzle = machinePuzzle ?? taskPuzzle ?? connectionPuzzle
 
+  const previewScore = resolveScore({
+    ownedMachines: state.ownedMachines,
+    connections: state.connections,
+    tasks: state.tasks,
+    partCatalog: MACHINES,
+    synergyCatalog: FEATURED_SYNERGIES,
+  })
+
   return (
     <div className="app">
       <div className="game-canvas" style={{ backgroundImage: `url(${BACKGROUND})` }}>
+        {failFlash && <div className="quota-fail-flash" />}
         <FloatingTextLayer floatingTexts={floatingTexts} />
         <RevenueBar credits={state.credits} />
         <MachineShelf
@@ -254,10 +307,11 @@ export default function App() {
         )}
 
         <div className="hud-topleft">
-          <p className="hud-day-info">{DAY_NAMES[state.dayOfWeek - 1]}, Week {state.week}</p>
+          <p className="hud-day-info">Day {state.day}</p>
           <p className={`hud-stamina-info${staminaFlash ? ' hud-stamina-info--flash' : ''}${state.stamina <= 0 ? ' hud-stamina-info--empty' : ''}`}>
             Stamina: {state.stamina}/{state.maxStamina}
           </p>
+          <p className="hud-score-preview">{previewScore.chips} chips × {Number.isInteger(previewScore.mult) ? previewScore.mult : previewScore.mult.toFixed(2)} = <strong>{previewScore.total}</strong> pts</p>
           <TaskList tasks={state.tasks} stamina={state.stamina} onResolve={handleStartTask} />
         </div>
 
@@ -265,7 +319,7 @@ export default function App() {
           activePanel={activePanel}
           onSelectPanel={togglePanel}
           onEndTurn={handleEndTurn}
-          endTurnLabel={state.dayOfWeek === QUOTA_CHECK_DAY ? 'End Week (Quota Check)' : 'End Day'}
+          endTurnLabel={'End Day (Quota Check)'}
           endTurnDisabled={state.isGameOver}
         />
 
@@ -300,6 +354,7 @@ export default function App() {
               quotaRequired={state.quotaRequired}
               week={state.week}
               dayOfWeek={state.dayOfWeek}
+              day={state.day}
               stamina={state.stamina}
               maxStamina={state.maxStamina}
               credits={state.credits}

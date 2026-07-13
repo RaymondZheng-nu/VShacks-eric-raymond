@@ -5,6 +5,14 @@ import { DAYS_PER_WEEK, QUOTA_CHECK_DAY, DAY_NAMES, DEBT_CUTOFF } from './gameSt
 import { generateDailyTasks } from './tasks'
 import { generateShopOffers } from './shop'
 
+const DAILY_EVENTS = [
+  { id: 'power-surge',  name: 'Power Surge',      desc: 'All machines aged 2 extra turns.' },
+  { id: 'overtime',     name: 'Overtime',          desc: '+2 stamina today.' },
+  { id: 'bulk-deal',    name: 'Bulk Deal',         desc: 'Shop costs halved today.' },
+  { id: 'efficiency',   name: 'Efficiency Drive',  desc: 'Tasks give double output today.' },
+]
+const EVENT_CHANCE = 0.3
+
 const FAILURE_MIN_TURNS = 4
 const FAILURE_MAX_TURNS = 6 // maybe increase this later, feels punishing
 const CREDITS_PER_QUOTA_PASS = 35
@@ -19,11 +27,14 @@ export function rollFailureThreshold(rng = Math.random) {
 export function advanceTurn(state, rng = Math.random) {
   const isQuotaDay = state.dayOfWeek === QUOTA_CHECK_DAY // saturday
 
+  const currentEvent = rng() < EVENT_CHANCE ? DAILY_EVENTS[Math.floor(rng() * DAILY_EVENTS.length)] : null
+
   const ownedMachines = state.ownedMachines.map((m) => ({ ...m }))
 
+  const surgeDmg = currentEvent?.id === 'power-surge' ? 2 : 0
   for (const m of ownedMachines) {
     if (!m.online) continue
-    m.turnsSinceSolved += 1
+    m.turnsSinceSolved += 1 + surgeDmg
     if (m.failureThreshold != null && m.turnsSinceSolved >= m.failureThreshold) {
       m.online = false
     }
@@ -54,7 +65,7 @@ export function advanceTurn(state, rng = Math.random) {
       creditsEarned = CREDITS_PER_QUOTA_PASS
       credits += CREDITS_PER_QUOTA_PASS
       quotaProgress = Math.max(0, quotaProgress - quotaRequired)
-      quotaRequired = Math.ceil(quotaRequired * 1.4) // 15 percent ramp per week todo tune this
+      quotaRequired = Math.ceil(quotaRequired * 1.15) // 15% ramp per day
       week += 1
       dayOfWeek = 1
       shopOffers = generateShopOffers(rng)
@@ -64,7 +75,7 @@ export function advanceTurn(state, rng = Math.random) {
       debt += debtIncurred
       credits -= debtIncurred
       quotaProgress = Math.max(0, quotaProgress - quotaRequired)
-      quotaRequired = Math.ceil(quotaRequired * 1.4) // 15% ramp per week, TODO: tune this
+      quotaRequired = Math.ceil(quotaRequired * 1.15) // 15% ramp per day
       week += 1
       dayOfWeek = 1
       shopOffers = generateShopOffers(rng)
@@ -89,6 +100,7 @@ export function advanceTurn(state, rng = Math.random) {
     quotaPassed: isQuotaDay ? quotaPassed : null,
     creditsEarned,
     debtIncurred,
+    currentEvent,
   }
 
   const nextState = {
@@ -104,10 +116,12 @@ export function advanceTurn(state, rng = Math.random) {
     isGameOver,
     lastDaySummary,
     shopOffers,
-    stamina: state.maxStamina,
+    stamina: state.maxStamina + (currentEvent?.id === 'overtime' ? 2 : 0),
+    currentEvent,
+    shopDiscount: currentEvent?.id === 'bulk-deal',
   }
 
-  const tasks = isGameOver ? [] : generateDailyTasks(nextState, rng)
+  const tasks = isGameOver ? [] : generateDailyTasks(nextState, rng, currentEvent)
   // console.log('day done, tasks:', tasks.length)
   return { ...nextState, tasks }
 }
